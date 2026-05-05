@@ -39,12 +39,12 @@ export function SustainabilityPanel() {
             key={index}
             className="glass-card rounded-xl p-4 border border-border/50 hover:scale-105 transition-transform"
           >
-            <div className={`p-2 rounded-lg bg-${metric.color}/10 w-fit mb-3`}>
-              <metric.icon className={`w-4 h-4 text-${metric.color}`} />
+            <div className="p-2 rounded-lg w-fit mb-3" style={{ backgroundColor: `${metric.color}20` }}>
+              <metric.icon className="w-4 h-4" style={{ color: metric.color }} />
             </div>
             <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
             <div className="flex items-baseline gap-1">
-              <span className={`text-2xl font-bold text-${metric.color}`}>{metric.value}</span>
+              <span className="text-2xl font-bold" style={{ color: metric.color }}>{metric.value}</span>
               <span className="text-sm text-muted-foreground">{metric.unit}</span>
             </div>
             <div className="flex items-center gap-1 mt-2">

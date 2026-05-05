@@ -1,3 +1,5 @@
+"use client"
+
 import {
   LineChart,
   Line,
@@ -6,6 +8,9 @@ import {
   Legend,
   Tooltip,
   ResponsiveContainer,
+  CartesianGrid,
+  XAxis,
+  YAxis,
 } from "recharts"
 import { energyData, nutrientData } from "@/lib/mockData"
 import { GrowthChart } from "@/components/charts/GrowthChart"

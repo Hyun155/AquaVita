@@ -1,3 +1,5 @@
+"use client"
+
 import { KPICards } from "@/components/dashboard/KPICards"
 import { DigitalTwin } from "@/components/environment/DigitalTwin"
 import { AIRecommendationPanel } from "@/components/insights/AIRecommendationPanel"
