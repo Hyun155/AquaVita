@@ -1,5 +1,5 @@
-import { AIRecommendationPanel } from "@/components/insights/AIRecommendationPanel"
+import { PlantAIDashboard } from "@/components/plant-ai/PlantAIDashboard"
 
 export default function PlantAiPage() {
-  return <AIRecommendationPanel />
+  return <PlantAIDashboard />
 }
