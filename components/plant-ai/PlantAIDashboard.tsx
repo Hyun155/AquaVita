@@ -612,7 +612,7 @@ export function PlantAIDashboard() {
                     preload="metadata"
                   />
                 </div>
-                <p className="mt-2 text-[11px] text-muted-foreground">Live feed from your uploaded video — auto-scan captures visible abnormalities</p>
+                <p className="mt-2 text-[11px] text-muted-foreground">Live feed — auto-scan captures visible abnormalities</p>
               </div>
             </div>
 
@@ -634,7 +634,7 @@ export function PlantAIDashboard() {
         <div className="space-y-4 xl:col-span-2">
           <div className="flex items-center justify-between px-1">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Plant Growth Simulation</h2>
+              <h2 className="text-lg font-semibold text-foreground">Plant Growth Performance</h2>
               <p className="text-xs text-muted-foreground">Live pH, temperature, and health streams</p>
             </div>
             <div className="flex items-center gap-2 rounded-full border border-neon-green/40 bg-neon-green/10 px-3 py-1 text-xs text-neon-green">
@@ -677,14 +677,16 @@ export function PlantAIDashboard() {
         <aside className="space-y-4">
           <DiseaseDetectionPanel />
 
-          <section className="glass-card rounded-2xl border border-border/50 p-5">
-            <div className="mb-4 flex items-start justify-between gap-3">
+          <section className="relative overflow-hidden rounded-2xl border border-neon-aqua/25 bg-gradient-to-br from-background/90 via-slate-950/95 to-background/75 p-5 shadow-[0_0_0_1px_rgba(45,212,191,0.08),0_24px_60px_rgba(0,0,0,0.28)]">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.10),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(34,197,94,0.08),transparent_30%)]" />
+            <div className="relative mb-4 flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-base font-semibold text-foreground">AI Recommendations</h3>
-                <p className="text-xs text-muted-foreground">Rule-based interventions prioritized by risk</p>
+                <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-neon-aqua/30 bg-neon-aqua/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-aqua">Live Triage</p>
+                <h3 className="text-base font-semibold tracking-tight text-foreground">AI Recommendations</h3>
+                <p className="text-xs text-muted-foreground">High-priority interventions with status-based grouping</p>
               </div>
               <span
-                className={`rounded-lg border px-2 py-1 text-xs font-semibold ${
+                className={`rounded-full border px-3 py-1 text-xs font-semibold tracking-wide ${
                   criticalCount > 0
                     ? "border-destructive/50 bg-destructive/15 text-destructive"
                     : "border-neon-aqua/40 bg-neon-aqua/15 text-neon-aqua"
@@ -694,7 +696,7 @@ export function PlantAIDashboard() {
               </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="relative space-y-3">
               {/* Group recommendations by status: in-progress, auto-resolved, manual-overridden */}
               {(() => {
                 const inProgress = recommendations.filter((rec) => interventions.some((iv) => iv.plantId === rec.plantId && iv.status === "in-progress"))
@@ -703,10 +705,13 @@ export function PlantAIDashboard() {
                 const others = recommendations.filter((rec) => !inProgress.includes(rec) && !resolvedAuto.includes(rec) && !resolvedManual.includes(rec))
 
                 return (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {inProgress.length > 0 && (
                       <div>
-                        <p className="mb-2 text-xs font-semibold text-foreground">In progress</p>
+                        <div className="mb-2 flex items-center justify-between">
+                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neon-aqua">In progress</p>
+                          <span className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] font-semibold text-warning">{inProgress.length}</span>
+                        </div>
                         <div className="space-y-2">
                           {inProgress.map((recommendation) => (
                             <RecommendationCard
@@ -722,7 +727,10 @@ export function PlantAIDashboard() {
 
                     {resolvedAuto.length > 0 && (
                       <div>
-                        <p className="mb-2 text-xs font-semibold text-foreground">Auto-resolved</p>
+                        <div className="mb-2 flex items-center justify-between">
+                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-neon-green">Auto-resolved</p>
+                          <span className="rounded-full border border-success/30 bg-success/10 px-2 py-0.5 text-[11px] font-semibold text-success">{resolvedAuto.length}</span>
+                        </div>
                         <div className="space-y-2">
                           {resolvedAuto.map((recommendation) => (
                             <RecommendationCard
@@ -738,7 +746,10 @@ export function PlantAIDashboard() {
 
                     {resolvedManual.length > 0 && (
                       <div>
-                        <p className="mb-2 text-xs font-semibold text-foreground">Manual overridden</p>
+                        <div className="mb-2 flex items-center justify-between">
+                          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-destructive">Manual overridden</p>
+                          <span className="rounded-full border border-destructive/30 bg-destructive/10 px-2 py-0.5 text-[11px] font-semibold text-destructive">{resolvedManual.length}</span>
+                        </div>
                         <div className="space-y-2">
                           {resolvedManual.map((recommendation) => (
                             <RecommendationCard
@@ -754,7 +765,7 @@ export function PlantAIDashboard() {
 
                     {others.length > 0 && (
                       <div>
-                        <p className="mb-2 text-xs font-semibold text-foreground">Other</p>
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Other</p>
                         <div className="space-y-2">
                           {others.map((recommendation) => (
                             <RecommendationCard
@@ -773,37 +784,41 @@ export function PlantAIDashboard() {
             </div>
           </section>
 
-          <section className="glass-card rounded-2xl border border-border/50 p-5">
-            <div className="mb-4 flex items-start justify-between gap-3">
+          <section className="relative overflow-hidden rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-background/90 via-slate-950/95 to-background/75 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.06),0_24px_60px_rgba(0,0,0,0.28)]">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(34,211,238,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(34,211,238,0.06)_1px,transparent_1px)] bg-[size:22px_22px] opacity-35" />
+            <div className="relative mb-4 flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-base font-semibold text-foreground">Automated Action Log</h3>
+                <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-neon-aqua/30 bg-neon-aqua/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-aqua">Telemetry Console</p>
+                <h3 className="text-base font-semibold tracking-tight text-foreground">Automated Action Log</h3>
                 <p className="text-xs text-muted-foreground">Controller responses triggered by the latest simulation tick</p>
               </div>
-              <span className="rounded-lg border border-neon-aqua/40 bg-neon-aqua/15 px-2 py-1 text-xs font-semibold text-neon-aqua">
+              <span className="rounded-full border border-neon-aqua/40 bg-neon-aqua/15 px-3 py-1 text-xs font-semibold tracking-wide text-neon-aqua">
                 {actionLog.length} recent
               </span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="relative space-y-2.5">
               {/* Constrain log box height and add scroll to avoid filling the whole page */}
-              <div className="max-h-60 overflow-y-auto space-y-2">
+              <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
                 {actionLog.length > 0 ? (
                   // show only the most recent 6 by default
                   actionLog.slice(0, 6).map((action) => (
-                    <div key={action.id} className="rounded-xl border border-border/50 bg-secondary/30 px-3 py-2.5">
+                    <div key={action.id} className="rounded-2xl border border-cyan-500/15 bg-gradient-to-r from-cyan-500/5 via-background/50 to-emerald-500/5 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-sm font-medium text-foreground">{action.message}</p>
-                          <p className="mt-1 text-xs text-muted-foreground">
+                          <p className="text-sm font-medium leading-snug text-foreground">{action.message}</p>
+                          <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-cyan-300/80">
                             {action.plantName} · {action.metric}
                           </p>
                         </div>
-                        <span className="whitespace-nowrap text-[11px] text-muted-foreground">{action.timestamp}</span>
+                        <span className="whitespace-nowrap rounded-full border border-border/40 bg-background/50 px-2 py-1 text-[11px] text-muted-foreground">
+                          {action.timestamp}
+                        </span>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="rounded-xl border border-dashed border-border/50 bg-secondary/20 px-3 py-4 text-sm text-muted-foreground">
+                  <div className="rounded-2xl border border-dashed border-cyan-500/20 bg-background/40 px-3 py-4 text-sm text-muted-foreground">
                     No automated adjustments yet. The controller will log actions when a plant leaves the optimal range.
                   </div>
                 )}
@@ -819,7 +834,7 @@ export function PlantAIDashboard() {
                       // simple UX: replace actionLog with a sliced copy to show more — keep in memory small
                       setActionLog((prev) => prev.slice(0, 20))
                     }}
-                    className="rounded-md px-3 py-1 text-xs font-semibold border border-border/40 bg-secondary/10 text-foreground"
+                    className="rounded-full border border-neon-aqua/30 bg-neon-aqua/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-neon-aqua transition-colors hover:bg-neon-aqua/20"
                   >
                     Show all recent
                   </button>
@@ -828,149 +843,150 @@ export function PlantAIDashboard() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-neon-green/35 bg-gradient-to-br from-neon-green/10 to-neon-aqua/10 p-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-neon-green">
-              <Sparkles className="h-4 w-4" />
-              AI Insight
+        </aside>
+      </section>
+
+      <section className="rounded-2xl border border-neon-green/35 bg-gradient-to-br from-neon-green/10 to-neon-aqua/10 p-4">
+        <div className="flex items-center gap-2 text-sm font-semibold text-neon-green">
+          <Sparkles className="h-4 w-4" />
+          AI Insight
+        </div>
+
+        <div className="mt-3 grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-3">
+            <div className="rounded-xl border border-border/40 bg-background/50 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Adaptive Recovery Rate</p>
+                  <p className="text-xs text-muted-foreground">Measured from resolved intervention outcomes</p>
+                </div>
+                <div className={`rounded-lg border px-3 py-1 text-sm font-semibold ${adaptiveInsight.successRate >= 75 ? "border-success/40 bg-success/15 text-success" : adaptiveInsight.successRate >= 50 ? "border-warning/40 bg-warning/15 text-warning" : "border-destructive/40 bg-destructive/15 text-destructive"}`}>
+                  {adaptiveInsight.successRate}%
+                </div>
+              </div>
+              <div className="mt-3 grid gap-2 text-xs text-muted-foreground md:grid-cols-3">
+                <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
+                  <p className="text-[11px] uppercase tracking-[0.14em]">Resolved</p>
+                  <p className="mt-1 text-base font-semibold text-foreground">{interventions.filter((item) => item.status === "resolved").length}</p>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
+                  <p className="text-[11px] uppercase tracking-[0.14em]">Failures</p>
+                  <p className="mt-1 text-base font-semibold text-foreground">{adaptiveInsight.repeatedFailures}</p>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
+                  <p className="text-[11px] uppercase tracking-[0.14em]">Active Fixes</p>
+                  <p className="mt-1 text-base font-semibold text-foreground">{adaptiveInsight.openInterventions}</p>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-3 grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
-              <div className="space-y-3">
-                <div className="rounded-xl border border-border/40 bg-background/50 p-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">Adaptive Recovery Rate</p>
-                      <p className="text-xs text-muted-foreground">Measured from resolved intervention outcomes</p>
-                    </div>
-                    <div className={`rounded-lg border px-3 py-1 text-sm font-semibold ${adaptiveInsight.successRate >= 75 ? "border-success/40 bg-success/15 text-success" : adaptiveInsight.successRate >= 50 ? "border-warning/40 bg-warning/15 text-warning" : "border-destructive/40 bg-destructive/15 text-destructive"}`}>
+            <div className="rounded-xl border border-border/40 bg-background/50 p-3">
+              <p className="text-sm font-semibold text-foreground">AI Performance Snapshot</p>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">Quick summary of AI confidence, top drivers, and efficiency trends.</p>
+              <div className="mt-3 grid gap-2 md:grid-cols-2">
+                <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] font-semibold text-muted-foreground">Model Confidence</p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className={`text-2xl font-bold ${adaptiveInsight.successRate >= 75 ? 'text-success' : adaptiveInsight.successRate >= 50 ? 'text-warning' : 'text-destructive'}`}>
                       {adaptiveInsight.successRate}%
                     </div>
+                    <div className="text-xs text-muted-foreground">based on resolved outcomes</div>
                   </div>
-                  <div className="mt-3 grid gap-2 text-xs text-muted-foreground md:grid-cols-3">
-                    <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
-                      <p className="text-[11px] uppercase tracking-[0.14em]">Resolved</p>
-                      <p className="mt-1 text-base font-semibold text-foreground">{interventions.filter((item) => item.status === "resolved").length}</p>
-                    </div>
-                    <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
-                      <p className="text-[11px] uppercase tracking-[0.14em]">Failures</p>
-                      <p className="mt-1 text-base font-semibold text-foreground">{adaptiveInsight.repeatedFailures}</p>
-                    </div>
-                    <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
-                      <p className="text-[11px] uppercase tracking-[0.14em]">Active Fixes</p>
-                      <p className="mt-1 text-base font-semibold text-foreground">{adaptiveInsight.openInterventions}</p>
-                    </div>
+                  <div className="mt-3 h-2 w-full rounded-full bg-border/20">
+                    <div className={`h-2 rounded-full ${adaptiveInsight.successRate >= 75 ? 'bg-success' : 'bg-neon-aqua'}`} style={{ width: `${adaptiveInsight.successRate}%` }} />
                   </div>
                 </div>
 
-                <div className="rounded-xl border border-border/40 bg-background/50 p-3">
-                  <p className="text-sm font-semibold text-foreground">AI Performance Snapshot</p>
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">Quick summary of AI confidence, top drivers, and efficiency trends.</p>
-                  <div className="mt-3 grid gap-2 md:grid-cols-2">
-                    <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
-                      <p className="text-[11px] uppercase tracking-[0.14em] font-semibold text-muted-foreground">Model Confidence</p>
-                      <div className="mt-2 flex items-center justify-between">
-                        <div className={`text-2xl font-bold ${adaptiveInsight.successRate >= 75 ? 'text-success' : adaptiveInsight.successRate >= 50 ? 'text-warning' : 'text-destructive'}`}>
-                          {adaptiveInsight.successRate}%
-                        </div>
-                        <div className="text-xs text-muted-foreground">based on resolved outcomes</div>
-                      </div>
-                      <div className="mt-3 h-2 w-full rounded-full bg-border/20">
-                        <div className={`h-2 rounded-full ${adaptiveInsight.successRate >= 75 ? 'bg-success' : 'bg-neon-aqua'}`} style={{ width: `${adaptiveInsight.successRate}%` }} />
-                      </div>
-                    </div>
-
-                    <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
-                      <p className="text-[11px] uppercase tracking-[0.14em] font-semibold text-muted-foreground">Top Drivers</p>
-                      <p className="mt-2 text-sm font-medium text-foreground">{adaptiveInsight.dominantMetric}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">Most affected crop: {adaptiveInsight.harvestCandidates?.[0]?.plant?.name ?? '—'}</p>
-                    </div>
-                  </div>
-                  <div className="mt-3 grid gap-2 md:grid-cols-3 text-xs text-muted-foreground">
-                    <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
-                      <p className="font-semibold text-foreground">Unnecessary Interventions avoided</p>
-                      <p className="mt-1">{adaptiveInsight.efficiency?.preventiveEfficiencyBonus?.toFixed ? adaptiveInsight.efficiency.preventiveEfficiencyBonus.toFixed(0) : adaptiveInsight.efficiency?.waterSavingsPercent}% more effective</p>
-                    </div>
-                    <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
-                      <p className="font-semibold text-foreground">Resouce Efficiency</p>
-                      <p className="mt-1">{adaptiveInsight.efficiency?.waterSavingsPercent}% water · {adaptiveInsight.efficiency?.energySavingsPercent}% energy</p>
-                    </div>
-                    <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
-                      <p className="font-semibold text-foreground">What to do next</p>
-                      <p className="mt-1">{adaptiveInsight.successRate < 60 ? 'Recommend: increase pH protocol granularity' : 'System is converging — monitor for 1-2 cycles'}</p>
-                    </div>
-                  </div>
+                <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
+                  <p className="text-[11px] uppercase tracking-[0.14em] font-semibold text-muted-foreground">Top Drivers</p>
+                  <p className="mt-2 text-sm font-medium text-foreground">{adaptiveInsight.dominantMetric}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Most affected crop: {adaptiveInsight.harvestCandidates?.[0]?.plant?.name ?? '—'}</p>
                 </div>
               </div>
+              <div className="mt-3 grid gap-2 md:grid-cols-3 text-xs text-muted-foreground">
+                <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
+                  <p className="font-semibold text-foreground">Unnecessary Interventions avoided</p>
+                  <p className="mt-1">{adaptiveInsight.efficiency?.preventiveEfficiencyBonus?.toFixed ? adaptiveInsight.efficiency.preventiveEfficiencyBonus.toFixed(0) : adaptiveInsight.efficiency?.waterSavingsPercent}% more effective</p>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
+                  <p className="font-semibold text-foreground">Resource Efficiency</p>
+                  <p className="mt-1">{adaptiveInsight.efficiency?.waterSavingsPercent}% water · {adaptiveInsight.efficiency?.energySavingsPercent}% energy</p>
+                </div>
+                <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
+                  <p className="font-semibold text-foreground">What to do next</p>
+                  <p className="mt-1">{adaptiveInsight.successRate < 60 ? 'Recommend: increase pH protocol granularity' : 'System is converging — monitor for 1-2 cycles'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              <div className="space-y-3">
-                <div className="rounded-xl border border-border/40 bg-background/50 p-3">
-                  <p className="text-sm font-semibold text-foreground">Optimal Harvest Strategy</p>
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{adaptiveInsight.harvestStrategy}</p>
-                  <div className="mt-3 space-y-2">
-                    {adaptiveInsight.harvestCandidates.map(({ plant, trend, daysToHarvest }) => (
-                      <div key={plant.id} className="rounded-lg border border-border/40 bg-secondary/20 p-2.5 text-xs">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="font-medium text-foreground">{plant.name}</p>
-                          <span className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${trend.label === "Improving" ? "border-success/40 bg-success/15 text-success" : trend.label === "Declining" ? "border-destructive/40 bg-destructive/15 text-destructive" : "border-warning/40 bg-warning/15 text-warning"}`}>
-                            {trend.label}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-muted-foreground">Harvest window: {daysToHarvest} days</p>
-                      </div>
-                    ))}
+          <div className="space-y-3">
+            <div className="rounded-xl border border-border/40 bg-background/50 p-3">
+              <p className="text-sm font-semibold text-foreground">Optimal Harvest Strategy</p>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{adaptiveInsight.harvestStrategy}</p>
+              <div className="mt-3 space-y-2">
+                {adaptiveInsight.harvestCandidates.map(({ plant, trend, daysToHarvest }) => (
+                  <div key={plant.id} className="rounded-lg border border-border/40 bg-secondary/20 p-2.5 text-xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium text-foreground">{plant.name}</p>
+                      <span className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${trend.label === "Improving" ? "border-success/40 bg-success/15 text-success" : trend.label === "Declining" ? "border-destructive/40 bg-destructive/15 text-destructive" : "border-warning/40 bg-warning/15 text-warning"}`}>
+                        {trend.label}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-muted-foreground">Harvest window: {daysToHarvest} days</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-neon-green/25 bg-neon-green/10 p-3">
+              <p className="text-sm font-semibold text-foreground">Trend Summary</p>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                Positive health momentum shortens the harvest window, while declining trends signal that the crop should be stabilized before cutting.
+              </p>
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                Dominant failure mode: <span className="font-medium text-foreground">{adaptiveInsight.dominantMetric}</span>
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-neon-aqua/25 bg-neon-aqua/10 p-3">
+              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-neon-aqua">
+                <Activity className="h-4 w-4" />
+                Resource Efficiency
+              </div>
+              <p className="mb-2 text-xs text-muted-foreground">AI-optimized predictive control reducing waste</p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">💧 Water saved</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-semibold text-neon-aqua">{adaptiveInsight.efficiency.waterSavingsPercent}%</span>
+                    <p className="text-[11px] text-muted-foreground">{adaptiveInsight.efficiency.waterSavingsL}L/week</p>
                   </div>
                 </div>
-
-                <div className="rounded-xl border border-neon-green/25 bg-neon-green/10 p-3">
-                  <p className="text-sm font-semibold text-foreground">Trend Summary</p>
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                    Positive health momentum shortens the harvest window, while declining trends signal that the crop should be stabilized before cutting.
-                  </p>
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                    Dominant failure mode: <span className="font-medium text-foreground">{adaptiveInsight.dominantMetric}</span>
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-neon-aqua/25 bg-neon-aqua/10 p-3">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-neon-aqua mb-2">
-                    <Activity className="h-4 w-4" />
-                    Resource Efficiency
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">⚡ Energy saved</span>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-2">AI-optimized predictive control reducing waste</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">💧 Water saved</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-sm font-semibold text-neon-aqua">{adaptiveInsight.efficiency.waterSavingsPercent}%</span>
-                        <p className="text-[11px] text-muted-foreground">{adaptiveInsight.efficiency.waterSavingsL}L/week</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">⚡ Energy saved</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-sm font-semibold text-neon-green">{adaptiveInsight.efficiency.energySavingsPercent}%</span>
-                        <p className="text-[11px] text-muted-foreground">{adaptiveInsight.efficiency.energySavingsKwh} kWh/week</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/30">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-semibold text-foreground">Cost savings</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-sm font-semibold text-neon-green">${adaptiveInsight.efficiency.costSavingsUSD}</span>
-                        <p className="text-[11px] text-muted-foreground">/week</p>
-                      </div>
-                    </div>
+                  <div className="text-right">
+                    <span className="text-sm font-semibold text-neon-green">{adaptiveInsight.efficiency.energySavingsPercent}%</span>
+                    <p className="text-[11px] text-muted-foreground">{adaptiveInsight.efficiency.energySavingsKwh} kWh/week</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2 border-t border-border/30 pt-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-foreground">Cost savings</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm font-semibold text-neon-green">${adaptiveInsight.efficiency.costSavingsUSD}</span>
+                    <p className="text-[11px] text-muted-foreground">/week</p>
                   </div>
                 </div>
               </div>
             </div>
-          </section>
-        </aside>
+          </div>
+        </div>
       </section>
     </div>
   )
