@@ -41,32 +41,37 @@ export function RecommendationCard({ recommendation, actionStatus, onManualOverr
   }
 
   return (
-    <article
-      className={`rounded-xl border p-3.5 transition-all duration-300 animate-in fade-in slide-in-from-right-2 ${style.wrapper}`}
-    >
-      <div className="mb-2 flex items-center justify-between gap-2">
+    <article className={`group relative overflow-hidden rounded-2xl border p-4 transition-all duration-300 animate-in fade-in slide-in-from-right-2 ${style.wrapper} bg-gradient-to-br from-background/90 via-secondary/10 to-background/70 shadow-[0_0_0_1px_rgba(255,255,255,0.02),0_18px_40px_rgba(0,0,0,0.18)]`}>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.10),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(34,197,94,0.08),transparent_28%)] opacity-90" />
+      <div className={`absolute left-0 top-0 h-full w-1 ${style.icon.replace("text-", "bg-")}`} />
+
+      <div className="relative mb-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <style.Icon className={`h-4 w-4 ${style.icon}`} />
-          <p className="text-sm font-medium text-foreground">{recommendation.plantName}</p>
+          <span className={`rounded-full border p-1.5 ${style.chip}`}>
+            <style.Icon className={`h-3.5 w-3.5 ${style.icon}`} />
+          </span>
+          <div>
+            <p className="text-sm font-semibold tracking-tight text-foreground">{recommendation.plantName}</p>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Priority advisory</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {actionStatus ? (
-            <span className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${statusStyleMap[actionStatus]}`}>
+            <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-wide ${statusStyleMap[actionStatus]}`}>
               {actionStatus === "in-progress" ? "In Progress" : actionStatus === "manual-overridden" ? "Manual" : "Resolved"}
             </span>
           ) : (
-            <span className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${style.chip}`}>
+            <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold tracking-wide ${style.chip}`}>
               {style.label}
             </span>
           )}
         </div>
       </div>
-      <p className="text-xs text-muted-foreground">{recommendation.message}</p>
-      <div className="mt-3 flex items-center justify-between">
-        <div />
+      <p className="relative text-xs leading-relaxed text-muted-foreground">{recommendation.message}</p>
+      <div className="relative mt-3 flex items-center justify-end">
         <div className="flex items-center gap-2">
           {onManualOverride && actionStatus === "in-progress" && (
-            <Button size="sm" variant="ghost" onClick={onManualOverride}>
+            <Button size="sm" variant="ghost" className="border border-border/40 bg-background/40 text-xs text-foreground shadow-sm transition-colors hover:bg-secondary/30" onClick={onManualOverride}>
               Manual Override
             </Button>
           )}
