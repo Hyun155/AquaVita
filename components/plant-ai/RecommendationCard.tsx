@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 
 interface RecommendationCardProps {
   recommendation: PlantRecommendation
-  actionStatus?: "in-progress" | "resolved"
+  actionStatus?: "in-progress" | "resolved" | "manual-overridden"
   onManualOverride?: () => void
 }
 
@@ -37,6 +37,7 @@ export function RecommendationCard({ recommendation, actionStatus, onManualOverr
   const statusStyleMap = {
     "in-progress": "bg-warning/20 text-warning border-warning/40",
     resolved: "bg-success/20 text-success border-success/40",
+    "manual-overridden": "bg-destructive/20 text-destructive border-destructive/40",
   }
 
   return (
@@ -51,7 +52,7 @@ export function RecommendationCard({ recommendation, actionStatus, onManualOverr
         <div className="flex items-center gap-2">
           {actionStatus ? (
             <span className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${statusStyleMap[actionStatus]}`}>
-              {actionStatus === "in-progress" ? "In Progress" : "Resolved"}
+              {actionStatus === "in-progress" ? "In Progress" : actionStatus === "manual-overridden" ? "Manual" : "Resolved"}
             </span>
           ) : (
             <span className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${style.chip}`}>
@@ -64,7 +65,7 @@ export function RecommendationCard({ recommendation, actionStatus, onManualOverr
       <div className="mt-3 flex items-center justify-between">
         <div />
         <div className="flex items-center gap-2">
-          {onManualOverride && actionStatus && (
+          {onManualOverride && actionStatus === "in-progress" && (
             <Button size="sm" variant="ghost" onClick={onManualOverride}>
               Manual Override
             </Button>

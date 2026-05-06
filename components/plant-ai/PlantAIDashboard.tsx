@@ -9,12 +9,27 @@ import type { GrowthStage, PlantProfile, PlantRecommendation, PlantTelemetry } f
 import { automationController, type AutomationAction } from "@/lib/automationController"
 import { Sparkles, ShieldAlert, Activity, Cpu } from "lucide-react"
 
+const HEALTH_HISTORY_LIMIT = 24
+
+function createInitialHealthHistory(health: number) {
+  return Array.from({ length: HEALTH_HISTORY_LIMIT }, (_, index) => {
+    const progression = index / Math.max(HEALTH_HISTORY_LIMIT - 1, 1)
+    const wave = Math.sin(index / 3.2) * 0.8
+    return Number(clamp(health - (1 - progression) * 1.8 + wave, 0, 100).toFixed(0))
+  })
+}
+
+function appendHealthHistory(history: number[], value: number) {
+  const nextHistory = [...history, Number(value.toFixed(0))]
+  return nextHistory.length > HEALTH_HISTORY_LIMIT ? nextHistory.slice(nextHistory.length - HEALTH_HISTORY_LIMIT) : nextHistory
+}
+
 const initialPlants: PlantTelemetry[] = [
-  { id: "lettuce-a", name: "Lettuce A", stage: "Seedling", health: 93, ph: 6.3, temperature: 24.5 },
-  { id: "basil-b", name: "Basil B", stage: "Vegetative", health: 88, ph: 6.7, temperature: 25.1 },
-  { id: "spinach-c", name: "Spinach C", stage: "Mature", health: 79, ph: 6.0, temperature: 27.3 },
-  { id: "mint-d", name: "Mint D", stage: "Vegetative", health: 74, ph: 7.1, temperature: 26.6 },
-  { id: "kale-e", name: "Kale E", stage: "Harvest Ready", health: 86, ph: 6.5, temperature: 23.9 },
+  { id: "lettuce-a", name: "Lettuce A", stage: "Seedling", health: 93, healthHistory: createInitialHealthHistory(93), ph: 6.3, temperature: 24.5 },
+  { id: "basil-b", name: "Basil B", stage: "Vegetative", health: 88, healthHistory: createInitialHealthHistory(88), ph: 6.7, temperature: 25.1 },
+  { id: "spinach-c", name: "Spinach C", stage: "Mature", health: 79, healthHistory: createInitialHealthHistory(79), ph: 6.0, temperature: 27.3 },
+  { id: "mint-d", name: "Mint D", stage: "Vegetative", health: 74, healthHistory: createInitialHealthHistory(74), ph: 7.1, temperature: 26.6 },
+  { id: "kale-e", name: "Kale E", stage: "Harvest Ready", health: 86, healthHistory: createInitialHealthHistory(86), ph: 6.5, temperature: 23.9 },
 ]
 
 const plantProfiles: Record<string, PlantProfile> = {
@@ -169,6 +184,174 @@ function calculateDaysToHarvest(plant: PlantTelemetry) {
   return clamp(estimate, 1, 30)
 }
 
+function getHealthTrend(plant: PlantTelemetry) {
+  const history = plant.healthHistory
+
+  if (history.length < 2) {
+    return { delta: 0, label: "Stable" as const }
+  }
+
+  const delta = history[history.length - 1] - history[0]
+
+  if (delta > 1) {
+    return { delta, label: "Improving" as const }
+  }
+
+  if (delta < -1) {
+    return { delta, label: "Declining" as const }
+  }
+
+  return { delta, label: "Stable" as const }
+}
+
+function getHarvestPriority(plant: PlantTelemetry) {
+  const trend = getHealthTrend(plant)
+  const daysToHarvest = calculateDaysToHarvest(plant)
+  return plant.health + trend.delta * 2 - daysToHarvest * 1.5
+}
+
+function calculateResourceEfficiency(plants: PlantTelemetry[], actionLog: AutomationAction[]) {
+  // Baseline consumption: typical hydroponic system without AI optimization
+  const BASELINE_WATER_L_PER_WEEK = 100
+  const BASELINE_ENERGY_KWH_PER_WEEK = 150
+  const BASELINE_COST_USD_PER_WEEK = 35
+
+  // Measure optimization via intervention frequency
+  // Fewer interventions = better predictions = less corrective resource waste
+  // More successful interventions = better system tuning = lower baseline corrections needed
+  
+  // Count actionLog frequency to estimate efficiency gains
+  // Each preventive intervention saves ~8-12% resource waste from reactive corrections
+  const interventionCount = Math.max(1, actionLog.length)
+  const preventiveEfficiencyBonus = Math.min(18, interventionCount * 1.2) // Cap at 18% from preventive actions
+  
+  // Calculate success rate proxy: stable plants use less corrective energy
+  const avgHealth = plants.reduce((sum, p) => sum + p.health, 0) / plants.length
+  const stabilityBonus = Math.max(0, (avgHealth - 70) / 30) * 10 // 0-10% from health stability
+  
+  // Count plants in optimal ranges for additional efficiency
+  const optimalPlantCount = plants.filter(p => {
+    const phOptimal = p.ph >= 6.0 && p.ph <= 7.0
+    const tempOptimal = p.temperature >= 22 && p.temperature <= 26
+    const healthOptimal = p.health >= 75
+    return phOptimal && tempOptimal && healthOptimal
+  }).length
+  const rangeBonus = (optimalPlantCount / plants.length) * 8 // 0-8% from range adherence
+  
+  const totalEfficiencySavings = Math.round(preventiveEfficiencyBonus + stabilityBonus + rangeBonus)
+  
+  return {
+    waterSavingsPercent: Math.min(30, totalEfficiencySavings),
+    energySavingsPercent: Math.min(30, totalEfficiencySavings),
+    waterSavingsL: Math.round((BASELINE_WATER_L_PER_WEEK * totalEfficiencySavings) / 100),
+    energySavingsKwh: Math.round((BASELINE_ENERGY_KWH_PER_WEEK * totalEfficiencySavings) / 100),
+    costSavingsUSD: Math.round((BASELINE_COST_USD_PER_WEEK * totalEfficiencySavings) / 100),
+    preventiveEfficiencyBonus,
+    stabilityBonus,
+    rangeBonus,
+  }
+}
+
+function buildAdaptiveInsight(plants: PlantTelemetry[], interventions: PlantAIDashboardIntervention[], actionLog: AutomationAction[]) {
+  const resolvedInterventions = interventions.filter((item) => item.status === "resolved")
+  const successfulInterventions = resolvedInterventions.filter((item) => item.success)
+  const successRate = resolvedInterventions.length > 0 ? Math.round((successfulInterventions.length / resolvedInterventions.length) * 100) : 100
+
+  const metricCounts = actionLog.reduce(
+    (counts, action) => ({
+      ...counts,
+      [action.metric]: counts[action.metric] + 1,
+    }),
+    { pH: 0, temperature: 0 },
+  )
+
+  const dominantMetric = metricCounts.pH >= metricCounts.temperature ? "pH" : "temperature"
+  const repeatedFailures = resolvedInterventions.length - successfulInterventions.length
+  const openInterventions = interventions.filter((item) => item.status === "in-progress").length
+  const trendingPlant = [...plants].sort((a, b) => getHarvestPriority(b) - getHarvestPriority(a))[0]
+
+  const failureSummary =
+    successRate === 0
+      ? dominantMetric === "pH"
+        ? "Repeated pH corrections are not holding. The buffer dose is likely too small or the correction interval is too slow."
+        : "Repeated temperature corrections are not lowering the canopy temperature fast enough. The airflow or cooling protocol needs a stronger response."
+      : successRate < 50
+        ? dominantMetric === "pH"
+          ? "pH is the dominant failure mode. Corrections should be slightly stronger and applied in smaller, more frequent steps."
+          : "Temperature is the dominant failure mode. Increase airflow duty cycle and shorten the cooling recovery interval."
+        : "Interventions are converging. Keep the correction strength, but keep an eye on the most volatile metric."
+
+  const nutrientProtocol =
+    dominantMetric === "pH"
+      ? successRate === 0
+        ? "Increase alkaline buffer concentration by 10-15% and reduce oscillation with smaller follow-up doses."
+        : "Tune buffer dosing upward slightly and keep nutrient mixture changes incremental to avoid rebound drift."
+      : "Maintain a balanced nutrient mix, but verify EC after every recovery step to avoid nutrient stress masking the real issue."
+
+  const climateProtocol =
+    dominantMetric === "temperature"
+      ? successRate === 0
+        ? "Raise airflow duty cycle, pre-cool the chamber earlier, and use gentler cooling steps to prevent overshoot."
+        : "Add earlier ventilation triggers and shorten the response window before canopy heat spikes."
+      : "Keep airflow stable while pH is corrected, then recheck temperature so the nutrient fix is not fighting heat stress."
+
+  const harvestStrategy = trendingPlant
+    ? (() => {
+        const trend = getHealthTrend(trendingPlant)
+        const daysToHarvest = calculateDaysToHarvest(trendingPlant)
+
+        if (trend.label === "Improving" && trendingPlant.health >= 85) {
+          return `${trendingPlant.name} is trending upward. Prepare for harvest in about ${Math.max(1, daysToHarvest - 1)} days while momentum stays positive.`
+        }
+
+        if (trend.label === "Declining") {
+          return `${trendingPlant.name} is slipping. Delay harvest by ${Math.min(3, Math.max(1, daysToHarvest + 1))} days and stabilize the canopy first.`
+        }
+
+        return `${trendingPlant.name} is stable. Target harvest in ${daysToHarvest} days once the trend holds for another cycle.`
+      })()
+    : "No harvest guidance available yet."
+
+  const harvestCandidates = [...plants]
+    .map((plant) => {
+      const trend = getHealthTrend(plant)
+      const daysToHarvest = calculateDaysToHarvest(plant)
+
+      return {
+        plant,
+        trend,
+        daysToHarvest,
+        score: getHarvestPriority(plant),
+      }
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+
+  const efficiency = calculateResourceEfficiency(plants, actionLog)
+
+  return {
+    successRate,
+    repeatedFailures,
+    openInterventions,
+    dominantMetric,
+    failureSummary,
+    nutrientProtocol,
+    climateProtocol,
+    harvestStrategy,
+    harvestCandidates,
+    efficiency,
+  }
+}
+
+type PlantAIDashboardIntervention = {
+  id: string
+  plantId: string
+  message: string
+  timestamp: string
+  status: "in-progress" | "resolved"
+  success?: boolean
+}
+
 function buildRecommendations(plants: PlantTelemetry[]) {
   const recommendations: PlantRecommendation[] = []
 
@@ -236,7 +419,7 @@ export function PlantAIDashboard() {
   const [actionLog, setActionLog] = useState<AutomationAction[]>([])
   const [recoveryState, setRecoveryState] = useState<Record<string, { progress: number; active: boolean }>>({})
   const [interventions, setInterventions] = useState<
-    { id: string; plantId: string; message: string; timestamp: string; status: "in-progress" | "resolved"; success?: boolean }[]
+    PlantAIDashboardIntervention[]
   >([])
 
   useEffect(() => {
@@ -252,12 +435,14 @@ export function PlantAIDashboard() {
             const nextPh = clamp(plant.ph + phDelta, 5.5, 7.5)
             const nextTemperature = clamp(plant.temperature + randomBetween(-0.4, 0.2), 20, 30)
             const nextHealth = clamp(plant.health + randomBetween(6, 12), 0, 100)
+            const roundedHealth = Number(nextHealth.toFixed(0))
 
             return {
               ...plant,
               ph: Number(nextPh.toFixed(2)),
               temperature: Number(nextTemperature.toFixed(1)),
-              health: Number(nextHealth.toFixed(0)),
+              health: roundedHealth,
+              healthHistory: appendHealthHistory(plant.healthHistory, roundedHealth),
             }
           }
 
@@ -266,12 +451,14 @@ export function PlantAIDashboard() {
           const nextTemperature = clamp(plant.temperature + randomBetween(-0.8, 0.8), 20, 30)
           const healthDelta = randomBetween(-2, 2) - (stressMode ? randomBetween(0.8, 2.2) : 0)
           const nextHealth = clamp(plant.health + healthDelta, 0, 100)
+          const roundedHealth = Number(nextHealth.toFixed(0))
 
           return {
             ...plant,
             ph: Number(nextPh.toFixed(2)),
             temperature: Number(nextTemperature.toFixed(1)),
-            health: Number(nextHealth.toFixed(0)),
+            health: roundedHealth,
+            healthHistory: appendHealthHistory(plant.healthHistory, roundedHealth),
           }
         })
 
@@ -348,6 +535,7 @@ export function PlantAIDashboard() {
   }, [])
 
   const recommendations = useMemo(() => buildRecommendations(plants), [plants])
+  const adaptiveInsight = useMemo(() => buildAdaptiveInsight(plants, interventions, actionLog), [plants, interventions, actionLog])
   const criticalCount = recommendations.filter((item) => item.severity === "critical").length
 
   const handleManualOverride = (plantId: string) => {
@@ -355,10 +543,6 @@ export function PlantAIDashboard() {
     setRecoveryState((prev) => ({ ...prev, [plantId]: { progress: 100, active: false } }))
     setInterventions((prev) => prev.map((iv) => (iv.plantId === plantId && iv.status === "in-progress" ? { ...iv, status: "resolved", success: false } : iv)))
   }
-
-  const recentInterventions = interventions.slice(0, 5)
-  const successCount = recentInterventions.filter((i) => i.success).length
-  const successRate = recentInterventions.length > 0 ? Math.round((successCount / recentInterventions.length) * 100) : 100
 
   return (
     <div className="space-y-6">
@@ -510,20 +694,82 @@ export function PlantAIDashboard() {
               </span>
             </div>
 
-            <div className="space-y-2.5">
-              {recommendations.map((recommendation) => {
-                const latestIntervention = interventions.find((iv) => iv.plantId === recommendation.plantId && iv.status === "in-progress")
-                const actionStatus = latestIntervention ? "in-progress" : interventions.find((iv) => iv.plantId === recommendation.plantId && iv.status === "resolved") ? "resolved" : undefined
+            <div className="space-y-3">
+              {/* Group recommendations by status: in-progress, auto-resolved, manual-overridden */}
+              {(() => {
+                const inProgress = recommendations.filter((rec) => interventions.some((iv) => iv.plantId === rec.plantId && iv.status === "in-progress"))
+                const resolvedAuto = recommendations.filter((rec) => interventions.some((iv) => iv.plantId === rec.plantId && iv.status === "resolved" && iv.success === true))
+                const resolvedManual = recommendations.filter((rec) => interventions.some((iv) => iv.plantId === rec.plantId && iv.status === "resolved" && iv.success === false))
+                const others = recommendations.filter((rec) => !inProgress.includes(rec) && !resolvedAuto.includes(rec) && !resolvedManual.includes(rec))
 
                 return (
-                  <RecommendationCard
-                    key={recommendation.id}
-                    recommendation={recommendation}
-                    actionStatus={actionStatus}
-                    onManualOverride={() => handleManualOverride(recommendation.plantId)}
-                  />
+                  <div className="space-y-2">
+                    {inProgress.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-xs font-semibold text-foreground">In progress</p>
+                        <div className="space-y-2">
+                          {inProgress.map((recommendation) => (
+                            <RecommendationCard
+                              key={recommendation.id}
+                              recommendation={recommendation}
+                              actionStatus="in-progress"
+                              onManualOverride={() => handleManualOverride(recommendation.plantId)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {resolvedAuto.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-xs font-semibold text-foreground">Auto-resolved</p>
+                        <div className="space-y-2">
+                          {resolvedAuto.map((recommendation) => (
+                            <RecommendationCard
+                              key={recommendation.id}
+                              recommendation={recommendation}
+                              actionStatus="resolved"
+                              onManualOverride={() => handleManualOverride(recommendation.plantId)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {resolvedManual.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-xs font-semibold text-foreground">Manual overridden</p>
+                        <div className="space-y-2">
+                          {resolvedManual.map((recommendation) => (
+                            <RecommendationCard
+                              key={recommendation.id}
+                              recommendation={recommendation}
+                              actionStatus="manual-overridden"
+                              onManualOverride={() => handleManualOverride(recommendation.plantId)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {others.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-xs font-semibold text-foreground">Other</p>
+                        <div className="space-y-2">
+                          {others.map((recommendation) => (
+                            <RecommendationCard
+                              key={recommendation.id}
+                              recommendation={recommendation}
+                              actionStatus={undefined}
+                              onManualOverride={() => handleManualOverride(recommendation.plantId)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )
-              })}
+              })()}
             </div>
           </section>
 
@@ -539,23 +785,44 @@ export function PlantAIDashboard() {
             </div>
 
             <div className="space-y-2.5">
-              {actionLog.length > 0 ? (
-                actionLog.map((action) => (
-                  <div key={action.id} className="rounded-xl border border-border/50 bg-secondary/30 px-3 py-2.5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{action.message}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {action.plantName} · {action.metric}
-                        </p>
+              {/* Constrain log box height and add scroll to avoid filling the whole page */}
+              <div className="max-h-60 overflow-y-auto space-y-2">
+                {actionLog.length > 0 ? (
+                  // show only the most recent 6 by default
+                  actionLog.slice(0, 6).map((action) => (
+                    <div key={action.id} className="rounded-xl border border-border/50 bg-secondary/30 px-3 py-2.5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{action.message}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {action.plantName} · {action.metric}
+                          </p>
+                        </div>
+                        <span className="whitespace-nowrap text-[11px] text-muted-foreground">{action.timestamp}</span>
                       </div>
-                      <span className="whitespace-nowrap text-[11px] text-muted-foreground">{action.timestamp}</span>
                     </div>
+                  ))
+                ) : (
+                  <div className="rounded-xl border border-dashed border-border/50 bg-secondary/20 px-3 py-4 text-sm text-muted-foreground">
+                    No automated adjustments yet. The controller will log actions when a plant leaves the optimal range.
                   </div>
-                ))
-              ) : (
-                <div className="rounded-xl border border-dashed border-border/50 bg-secondary/20 px-3 py-4 text-sm text-muted-foreground">
-                  No automated adjustments yet. The controller will log actions when a plant leaves the optimal range.
+                )}
+              </div>
+
+              {/* show more button if there are more than displayed */}
+              {actionLog.length > 6 && (
+                <div className="flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // expand to show all recent entries
+                      // simple UX: replace actionLog with a sliced copy to show more — keep in memory small
+                      setActionLog((prev) => prev.slice(0, 20))
+                    }}
+                    className="rounded-md px-3 py-1 text-xs font-semibold border border-border/40 bg-secondary/10 text-foreground"
+                  >
+                    Show all recent
+                  </button>
                 </div>
               )}
             </div>
@@ -566,15 +833,142 @@ export function PlantAIDashboard() {
               <Sparkles className="h-4 w-4" />
               AI Insight
             </div>
-              <div className="mt-2 flex items-center justify-between gap-3">
-                <p className="text-xs leading-relaxed text-muted-foreground">
-                  Health above 85% accelerates harvest readiness. Keep pH between 6.0 and 7.2 for best nutrient absorption.
-                </p>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-foreground">Automated Success</p>
-                  <p className="text-xs text-muted-foreground">Last 5: <span className="font-medium text-neon-green">{successRate}%</span></p>
+
+            <div className="mt-3 grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
+              <div className="space-y-3">
+                <div className="rounded-xl border border-border/40 bg-background/50 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Adaptive Recovery Rate</p>
+                      <p className="text-xs text-muted-foreground">Measured from resolved intervention outcomes</p>
+                    </div>
+                    <div className={`rounded-lg border px-3 py-1 text-sm font-semibold ${adaptiveInsight.successRate >= 75 ? "border-success/40 bg-success/15 text-success" : adaptiveInsight.successRate >= 50 ? "border-warning/40 bg-warning/15 text-warning" : "border-destructive/40 bg-destructive/15 text-destructive"}`}>
+                      {adaptiveInsight.successRate}%
+                    </div>
+                  </div>
+                  <div className="mt-3 grid gap-2 text-xs text-muted-foreground md:grid-cols-3">
+                    <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
+                      <p className="text-[11px] uppercase tracking-[0.14em]">Resolved</p>
+                      <p className="mt-1 text-base font-semibold text-foreground">{interventions.filter((item) => item.status === "resolved").length}</p>
+                    </div>
+                    <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
+                      <p className="text-[11px] uppercase tracking-[0.14em]">Failures</p>
+                      <p className="mt-1 text-base font-semibold text-foreground">{adaptiveInsight.repeatedFailures}</p>
+                    </div>
+                    <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
+                      <p className="text-[11px] uppercase tracking-[0.14em]">Active Fixes</p>
+                      <p className="mt-1 text-base font-semibold text-foreground">{adaptiveInsight.openInterventions}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-border/40 bg-background/50 p-3">
+                  <p className="text-sm font-semibold text-foreground">AI Performance Snapshot</p>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">Quick summary of AI confidence, top drivers, and efficiency trends.</p>
+                  <div className="mt-3 grid gap-2 md:grid-cols-2">
+                    <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
+                      <p className="text-[11px] uppercase tracking-[0.14em] font-semibold text-muted-foreground">Model Confidence</p>
+                      <div className="mt-2 flex items-center justify-between">
+                        <div className={`text-2xl font-bold ${adaptiveInsight.successRate >= 75 ? 'text-success' : adaptiveInsight.successRate >= 50 ? 'text-warning' : 'text-destructive'}`}>
+                          {adaptiveInsight.successRate}%
+                        </div>
+                        <div className="text-xs text-muted-foreground">based on resolved outcomes</div>
+                      </div>
+                      <div className="mt-3 h-2 w-full rounded-full bg-border/20">
+                        <div className={`h-2 rounded-full ${adaptiveInsight.successRate >= 75 ? 'bg-success' : 'bg-neon-aqua'}`} style={{ width: `${adaptiveInsight.successRate}%` }} />
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
+                      <p className="text-[11px] uppercase tracking-[0.14em] font-semibold text-muted-foreground">Top Drivers</p>
+                      <p className="mt-2 text-sm font-medium text-foreground">{adaptiveInsight.dominantMetric}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Most affected crop: {adaptiveInsight.harvestCandidates?.[0]?.plant?.name ?? '—'}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 grid gap-2 md:grid-cols-3 text-xs text-muted-foreground">
+                    <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
+                      <p className="font-semibold text-foreground">Unnecessary Interventions avoided</p>
+                      <p className="mt-1">{adaptiveInsight.efficiency?.preventiveEfficiencyBonus?.toFixed ? adaptiveInsight.efficiency.preventiveEfficiencyBonus.toFixed(0) : adaptiveInsight.efficiency?.waterSavingsPercent}% more effective</p>
+                    </div>
+                    <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
+                      <p className="font-semibold text-foreground">Resouce Efficiency</p>
+                      <p className="mt-1">{adaptiveInsight.efficiency?.waterSavingsPercent}% water · {adaptiveInsight.efficiency?.energySavingsPercent}% energy</p>
+                    </div>
+                    <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
+                      <p className="font-semibold text-foreground">What to do next</p>
+                      <p className="mt-1">{adaptiveInsight.successRate < 60 ? 'Recommend: increase pH protocol granularity' : 'System is converging — monitor for 1-2 cycles'}</p>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              <div className="space-y-3">
+                <div className="rounded-xl border border-border/40 bg-background/50 p-3">
+                  <p className="text-sm font-semibold text-foreground">Optimal Harvest Strategy</p>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{adaptiveInsight.harvestStrategy}</p>
+                  <div className="mt-3 space-y-2">
+                    {adaptiveInsight.harvestCandidates.map(({ plant, trend, daysToHarvest }) => (
+                      <div key={plant.id} className="rounded-lg border border-border/40 bg-secondary/20 p-2.5 text-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-medium text-foreground">{plant.name}</p>
+                          <span className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${trend.label === "Improving" ? "border-success/40 bg-success/15 text-success" : trend.label === "Declining" ? "border-destructive/40 bg-destructive/15 text-destructive" : "border-warning/40 bg-warning/15 text-warning"}`}>
+                            {trend.label}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-muted-foreground">Harvest window: {daysToHarvest} days</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-neon-green/25 bg-neon-green/10 p-3">
+                  <p className="text-sm font-semibold text-foreground">Trend Summary</p>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    Positive health momentum shortens the harvest window, while declining trends signal that the crop should be stabilized before cutting.
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    Dominant failure mode: <span className="font-medium text-foreground">{adaptiveInsight.dominantMetric}</span>
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-neon-aqua/25 bg-neon-aqua/10 p-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-neon-aqua mb-2">
+                    <Activity className="h-4 w-4" />
+                    Resource Efficiency
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">AI-optimized predictive control reducing waste</p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">💧 Water saved</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-semibold text-neon-aqua">{adaptiveInsight.efficiency.waterSavingsPercent}%</span>
+                        <p className="text-[11px] text-muted-foreground">{adaptiveInsight.efficiency.waterSavingsL}L/week</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">⚡ Energy saved</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-semibold text-neon-green">{adaptiveInsight.efficiency.energySavingsPercent}%</span>
+                        <p className="text-[11px] text-muted-foreground">{adaptiveInsight.efficiency.energySavingsKwh} kWh/week</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/30">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-foreground">Cost savings</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-semibold text-neon-green">${adaptiveInsight.efficiency.costSavingsUSD}</span>
+                        <p className="text-[11px] text-muted-foreground">/week</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </section>
         </aside>
       </section>

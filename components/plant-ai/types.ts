@@ -5,6 +5,7 @@ export interface PlantTelemetry {
   name: string
   stage: GrowthStage
   health: number
+  healthHistory: number[]
   ph: number
   temperature: number
 }
