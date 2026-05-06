@@ -9,6 +9,20 @@ export interface PlantTelemetry {
   temperature: number
 }
 
+export interface PlantProfile {
+  displayName: string
+  scientificName: string
+  growthSpeed: string
+  idealFor?: string
+  leafTypeOrStructure?: string
+  optimalPh: string
+  optimalTemperature: string
+  optimalHumidity?: string
+  sensitivities: string[]
+  commonIssues: string[]
+  simulationBehavior: string[]
+}
+
 export type RecommendationSeverity = "critical" | "warning" | "info"
 
 export interface PlantRecommendation {

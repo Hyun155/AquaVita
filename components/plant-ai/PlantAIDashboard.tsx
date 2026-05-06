@@ -5,7 +5,7 @@ import { PlantCard } from "@/components/plant-ai/PlantCard"
 import { RecommendationCard } from "@/components/plant-ai/RecommendationCard"
 import { DiseaseDetectionPanel } from "@/components/plant-ai/DiseaseDetectionPanel"
 import { Switch } from "@/components/ui/switch"
-import type { GrowthStage, PlantRecommendation, PlantTelemetry } from "@/components/plant-ai/types"
+import type { GrowthStage, PlantProfile, PlantRecommendation, PlantTelemetry } from "@/components/plant-ai/types"
 import { automationController, type AutomationAction } from "@/lib/automationController"
 import { Sparkles, ShieldAlert, Activity, Cpu } from "lucide-react"
 
@@ -16,6 +16,121 @@ const initialPlants: PlantTelemetry[] = [
   { id: "mint-d", name: "Mint D", stage: "Vegetative", health: 74, ph: 7.1, temperature: 26.6 },
   { id: "kale-e", name: "Kale E", stage: "Harvest Ready", health: 86, ph: 6.5, temperature: 23.9 },
 ]
+
+const plantProfiles: Record<string, PlantProfile> = {
+  "spinach-c": {
+    displayName: "Spinach",
+    scientificName: "Spinacia oleracea",
+    growthSpeed: "Fast to moderate",
+    idealFor: "Cool environments",
+    leafTypeOrStructure: "Thin and soft leaves",
+    optimalPh: "6.0 to 6.8",
+    optimalTemperature: "18 to 24C",
+    optimalHumidity: "60 to 70%",
+    sensitivities: [
+      "Very sensitive to pH imbalance",
+      "Sensitive to heat and bolts easily",
+      "Moderate nutrient sensitivity",
+    ],
+    commonIssues: [
+      "Yellowing leaves from nitrogen deficiency",
+      "Burnt edges from high EC or nutrient stress",
+      "Rapid decline when pH is below 6.0",
+    ],
+    simulationBehavior: [
+      "Health drops fast when pH is below 6.0 or above 7.0",
+      "Health drops moderately when temperature is above 26C",
+    ],
+  },
+  "lettuce-a": {
+    displayName: "Lettuce",
+    scientificName: "Lactuca sativa",
+    growthSpeed: "Fast",
+    idealFor: "Most common hydroponic crop with predictable behavior",
+    optimalPh: "5.8 to 6.5",
+    optimalTemperature: "18 to 26C",
+    optimalHumidity: "50 to 70%",
+    sensitivities: [
+      "Sensitive to high temperature",
+      "Mild pH sensitivity",
+      "Nutrient tolerant",
+    ],
+    commonIssues: [
+      "Tip burn from calcium imbalance",
+      "Bitter taste from heat stress",
+    ],
+    simulationBehavior: [
+      "Health drops strongly when temperature is above 28C",
+      "Mild health effect from pH fluctuation",
+    ],
+  },
+  "basil-b": {
+    displayName: "Basil",
+    scientificName: "Ocimum basilicum",
+    growthSpeed: "Fast",
+    idealFor: "Controlled systems",
+    leafTypeOrStructure: "Resilient structure",
+    optimalPh: "5.5 to 6.5",
+    optimalTemperature: "22 to 30C",
+    optimalHumidity: "50 to 70%",
+    sensitivities: [
+      "Very tolerant overall",
+      "Slight sensitivity to nutrient deficiency",
+    ],
+    commonIssues: [
+      "Pale leaves from nitrogen deficiency",
+      "Slow growth from nutrient imbalance",
+    ],
+    simulationBehavior: [
+      "Health drops slowly",
+      "Recovers quickly after corrective actions",
+    ],
+  },
+  "kale-e": {
+    displayName: "Kale",
+    scientificName: "Brassica oleracea",
+    growthSpeed: "Moderate",
+    idealFor: "Hardy hydroponic crop",
+    leafTypeOrStructure: "Thick leaves with better resistance",
+    optimalPh: "5.5 to 6.5",
+    optimalTemperature: "18 to 25C",
+    sensitivities: [
+      "Generally resistant",
+      "Slight sensitivity to nutrient imbalance",
+    ],
+    commonIssues: [
+      "Yellow leaves from nitrogen deficiency",
+      "Stunted growth from poor nutrient delivery",
+    ],
+    simulationBehavior: [
+      "Health declines slowly",
+      "Maintains stable behavior under stress",
+    ],
+  },
+  "mint-d": {
+    displayName: "Mint",
+    scientificName: "Mentha spp.",
+    growthSpeed: "Very fast",
+    idealFor: "Aggressive spread and quick biomass",
+    leafTypeOrStructure: "Appears strong but can collapse quickly under stress",
+    optimalPh: "6.0 to 7.0",
+    optimalTemperature: "20 to 28C",
+    sensitivities: [
+      "Highly sensitive to disease and pest attacks",
+      "Moderate pH sensitivity",
+      "Possible heat stress",
+    ],
+    commonIssues: [
+      "Spider mites are common",
+      "Leaf spot outbreaks",
+      "Rapid decline under combined stress",
+    ],
+    simulationBehavior: [
+      "Health can drop suddenly",
+      "Suitable as a critical demo plant",
+    ],
+  },
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
@@ -364,6 +479,7 @@ export function PlantAIDashboard() {
                   <PlantCard
                     key={plant.id}
                     plant={plant}
+                    profile={plantProfiles[plant.id]}
                     daysToHarvest={calculateDaysToHarvest(plant)}
                     riskLabel={stressMode ? riskLabel : undefined}
                     timeToFailureHours={stressMode ? timeToFailureHours : undefined}
