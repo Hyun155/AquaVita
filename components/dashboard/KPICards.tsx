@@ -11,6 +11,7 @@ export function KPICards() {
           icon={<Sprout className="w-5 h-5" />}
           trend={4.2}
           color="green"
+          delay={0}
         />
         <KPICard
           title="Water Quality Score"
@@ -19,6 +20,7 @@ export function KPICards() {
           trend={2.1}
           color="aqua"
           unit=""
+          delay={100}
         />
         <KPICard
           title="Energy Efficiency"
@@ -27,6 +29,7 @@ export function KPICards() {
           trend={-1.5}
           color="yellow"
           unit="%"
+          delay={200}
         />
         <KPICard
           title="Sustainability Index"
@@ -34,6 +37,7 @@ export function KPICards() {
           icon={<Recycle className="w-5 h-5" />}
           trend={6.8}
           color="blue"
+          delay={300}
         />
       </div>
     </section>

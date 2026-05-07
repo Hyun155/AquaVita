@@ -1,9 +1,49 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Award, TrendingUp, Leaf } from "lucide-react"
 import { sustainabilityMetrics, badges } from "@/lib/mockData"
 
 export function SustainabilityPanel() {
+  const [scores, setScores] = useState<{ [key: string]: number }>({})
+  const [unlockedBadges, setUnlockedBadges] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    // Animate scores from 0 to final value
+    sustainabilityMetrics.forEach((metric) => {
+      const duration = 2000
+      const startValue = 0
+      const endValue = metric.value
+      const startTime = Date.now()
+
+      const animate = () => {
+        const now = Date.now()
+        const progress = Math.min((now - startTime) / duration, 1)
+        const currentValue = Math.floor(startValue + (endValue - startValue) * progress)
+        setScores((prev) => ({
+          ...prev,
+          [metric.label]: currentValue,
+        }))
+
+        if (progress < 1) {
+          requestAnimationFrame(animate)
+        }
+      }
+
+      requestAnimationFrame(animate)
+    })
+  }, [])
+
+  useEffect(() => {
+    // Unlock badges one by one with delay
+    badges.forEach((badge, index) => {
+      const timer = setTimeout(() => {
+        setUnlockedBadges((prev) => new Set([...prev, badge.name]))
+      }, 1500 + index * 300)
+      return () => clearTimeout(timer)
+    })
+  }, [])
+
   const getTierStyles = (tier: string) => {
     switch (tier) {
       case "gold":
@@ -16,7 +56,7 @@ export function SustainabilityPanel() {
   }
 
   const overallScore = Math.round(
-    sustainabilityMetrics.reduce((acc, m) => acc + m.value, 0) / sustainabilityMetrics.length,
+    Object.values(scores).reduce((acc, val) => acc + val, 0) / sustainabilityMetrics.length || 0,
   )
 
   return (
@@ -26,7 +66,7 @@ export function SustainabilityPanel() {
           <h2 className="text-lg font-semibold text-foreground">Sustainability Index</h2>
           <p className="text-sm text-muted-foreground">Environmental impact metrics</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-neon-green/20 to-neon-aqua/10 border border-neon-green/30">
+        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-neon-green/20 to-neon-aqua/10 border border-neon-green/30 transition-all duration-1000 animate-pulse">
           <Award className="w-5 h-5 text-neon-green" />
           <span className="text-lg font-bold text-neon-green">{overallScore}</span>
           <span className="text-xs text-muted-foreground">/100</span>
@@ -37,14 +77,21 @@ export function SustainabilityPanel() {
         {sustainabilityMetrics.map((metric, index) => (
           <div
             key={index}
-            className="glass-card rounded-xl p-4 border border-border/50 hover:scale-105 transition-transform"
+            className="glass-card rounded-xl p-4 border border-border/50 hover:scale-105 transition-all duration-300"
+            style={{
+              opacity: scores[metric.label] !== undefined ? 1 : 0,
+              transform: scores[metric.label] !== undefined ? "translateY(0)" : "translateY(10px)",
+              transitionDelay: `${index * 100}ms`,
+            }}
           >
             <div className="p-2 rounded-lg w-fit mb-3" style={{ backgroundColor: `${metric.color}20` }}>
               <metric.icon className="w-4 h-4" style={{ color: metric.color }} />
             </div>
             <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold" style={{ color: metric.color }}>{metric.value}</span>
+              <span className="text-2xl font-bold" style={{ color: metric.color }}>
+                {scores[metric.label] ?? 0}
+              </span>
               <span className="text-sm text-muted-foreground">{metric.unit}</span>
             </div>
             <div className="flex items-center gap-1 mt-2">
@@ -69,12 +116,21 @@ export function SustainabilityPanel() {
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-foreground mb-3">Achievement Badges</h3>
-        <div className="flex items-center gap-3 flex-wrap">
+        <h3 className="text-sm font-medium text-foreground mb-4">Achievement Badges</h3>
+        <div className="flex flex-wrap gap-3">
           {badges.map((badge, index) => (
             <div
               key={index}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r ${getTierStyles(badge.tier)} transition-transform hover:scale-105`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r ${getTierStyles(
+                badge.tier,
+              )} transition-all duration-500 hover:scale-105 ${
+                unlockedBadges.has(badge.name)
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-4 pointer-events-none"
+              }`}
+              style={{
+                transitionDelay: `${1500 + index * 300}ms`,
+              }}
             >
               <badge.icon className="w-4 h-4" />
               <span className="text-xs font-bold uppercase tracking-wide">{badge.name}</span>

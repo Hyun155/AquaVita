@@ -159,6 +159,15 @@ export const sustainabilityMetrics = [
   },
 ]
 
+export const yieldForecastData = [
+  { week: "Week 1", actual: 24, forecast: 25, confidence: 92 },
+  { week: "Week 2", actual: 32, forecast: 34, confidence: 89 },
+  { week: "Week 3", actual: 38, forecast: 40, confidence: 87 },
+  { week: "Week 4", actual: null, forecast: 42, confidence: 82 },
+  { week: "Week 5", actual: null, forecast: 43, confidence: 78 },
+  { week: "Week 6", actual: null, forecast: 44, confidence: 72 },
+]
+
 export const badges = [
   { name: "Water Champion", tier: "gold", icon: Droplets },
   { name: "Zero Waste", tier: "silver", icon: Recycle },
