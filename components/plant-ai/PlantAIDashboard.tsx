@@ -4,6 +4,10 @@ import { useEffect, useMemo, useState } from "react"
 import { PlantCard } from "@/components/plant-ai/PlantCard"
 import { RecommendationCard } from "@/components/plant-ai/RecommendationCard"
 import { DiseaseDetectionPanel } from "@/components/plant-ai/DiseaseDetectionPanel"
+import { VerticalLayerVisualization } from "@/components/plant-ai/VerticalLayerVisualization"
+import { PredictiveRiskAnalysis } from "@/components/plant-ai/PredictiveRiskAnalysis"
+import { HarvestOptimizationEngine } from "@/components/plant-ai/HarvestOptimizationEngine"
+import { ResourceEfficiencyPanel } from "@/components/plant-ai/ResourceEfficiencyPanel"
 import { Switch } from "@/components/ui/switch"
 import type { GrowthStage, PlantProfile, PlantRecommendation, PlantTelemetry } from "@/components/plant-ai/types"
 import { automationController, type AutomationAction } from "@/lib/automationController"
@@ -25,11 +29,121 @@ function appendHealthHistory(history: number[], value: number) {
 }
 
 const initialPlants: PlantTelemetry[] = [
-  { id: "lettuce-a", name: "Lettuce A", stage: "Seedling", health: 93, healthHistory: createInitialHealthHistory(93), ph: 6.3, temperature: 24.5 },
-  { id: "basil-b", name: "Basil B", stage: "Vegetative", health: 88, healthHistory: createInitialHealthHistory(88), ph: 6.7, temperature: 25.1 },
-  { id: "spinach-c", name: "Spinach C", stage: "Mature", health: 79, healthHistory: createInitialHealthHistory(79), ph: 6.0, temperature: 27.3 },
-  { id: "mint-d", name: "Mint D", stage: "Vegetative", health: 74, healthHistory: createInitialHealthHistory(74), ph: 7.1, temperature: 26.6 },
-  { id: "kale-e", name: "Kale E", stage: "Harvest Ready", health: 86, healthHistory: createInitialHealthHistory(86), ph: 6.5, temperature: 23.9 },
+  {
+    id: "lettuce-a",
+    name: "Lettuce A",
+    layerId: 1,
+    stage: "Seedling",
+    health: 93,
+    healthHistory: createInitialHealthHistory(93),
+    healthIndicators: {
+      overall: 93,
+      leafColor: "vibrant",
+      leafCondition: "pristine",
+      nitrogenStatus: 92,
+      nutrientBalance: 88,
+      hydrationLevel: 95,
+      stressSignals: [],
+    },
+    ph: 6.3,
+    temperature: 24.5,
+    humidity: 65,
+    lightIntensity: 380,
+    ec: 1.6,
+    diseaseRiskScore: 5,
+  },
+  {
+    id: "basil-b",
+    name: "Basil B",
+    layerId: 2,
+    stage: "Early Vegetative",
+    health: 88,
+    healthHistory: createInitialHealthHistory(88),
+    healthIndicators: {
+      overall: 88,
+      leafColor: "pale",
+      leafCondition: "stressed",
+      nitrogenStatus: 74,
+      nutrientBalance: 82,
+      hydrationLevel: 81,
+      stressSignals: ["Slow growth rate", "Nutrient deficiency possible"],
+    },
+    ph: 6.7,
+    temperature: 25.1,
+    humidity: 72,
+    lightIntensity: 340,
+    ec: 1.5,
+    diseaseRiskScore: 12,
+  },
+  {
+    id: "spinach-c",
+    name: "Spinach C",
+    layerId: 3,
+    stage: "Mature Vegetative",
+    health: 79,
+    healthHistory: createInitialHealthHistory(79),
+    healthIndicators: {
+      overall: 79,
+      leafColor: "vibrant",
+      leafCondition: "good",
+      nitrogenStatus: 88,
+      nutrientBalance: 91,
+      hydrationLevel: 92,
+      stressSignals: [],
+    },
+    ph: 6.0,
+    temperature: 27.3,
+    humidity: 68,
+    lightIntensity: 420,
+    ec: 1.7,
+    diseaseRiskScore: 8,
+  },
+  {
+    id: "mint-d",
+    name: "Mint D",
+    layerId: 4,
+    stage: "Early Vegetative",
+    health: 74,
+    healthHistory: createInitialHealthHistory(74),
+    healthIndicators: {
+      overall: 74,
+      leafColor: "yellowing",
+      leafCondition: "stressed",
+      nitrogenStatus: 62,
+      nutrientBalance: 71,
+      hydrationLevel: 68,
+      stressSignals: ["Heat stress visible", "Leaves drooping", "Wilting risk high"],
+    },
+    ph: 7.1,
+    temperature: 26.6,
+    humidity: 58,
+    lightIntensity: 450,
+    ec: 1.4,
+    diseaseRiskScore: 22,
+  },
+  {
+    id: "kale-e",
+    name: "Kale E",
+    layerId: 5,
+    stage: "Harvest Ready",
+    health: 86,
+    healthHistory: createInitialHealthHistory(86),
+    healthIndicators: {
+      overall: 86,
+      leafColor: "vibrant",
+      leafCondition: "good",
+      nitrogenStatus: 85,
+      nutrientBalance: 85,
+      hydrationLevel: 88,
+      stressSignals: [],
+    },
+    ph: 6.5,
+    temperature: 23.9,
+    humidity: 52,
+    lightIntensity: 480,
+    ec: 1.6,
+    diseaseRiskScore: 6,
+  },
 ]
 
 const plantProfiles: Record<string, PlantProfile> = {
@@ -42,6 +156,12 @@ const plantProfiles: Record<string, PlantProfile> = {
     optimalPh: "6.0 to 6.8",
     optimalTemperature: "18 to 24C",
     optimalHumidity: "60 to 70%",
+    ledSpectrumNeeds: {
+      seedling: "Balanced 400-700nm (300-400µmol)",
+      vegetative: "More blue spectrum 400-500nm (400-500µmol)",
+      mature: "Blue-red mix for density (500-600µmol)",
+    },
+    harvestReadyDays: 28,
     sensitivities: [
       "Very sensitive to pH imbalance",
       "Sensitive to heat and bolts easily",
@@ -65,6 +185,12 @@ const plantProfiles: Record<string, PlantProfile> = {
     optimalPh: "5.8 to 6.5",
     optimalTemperature: "18 to 26C",
     optimalHumidity: "50 to 70%",
+    ledSpectrumNeeds: {
+      seedling: "Red-blue mix (250-350µmol)",
+      vegetative: "More red spectrum 600-700nm (350-450µmol)",
+      mature: "Balanced full spectrum (450-550µmol)",
+    },
+    harvestReadyDays: 35,
     sensitivities: [
       "Sensitive to high temperature",
       "Mild pH sensitivity",
@@ -88,6 +214,12 @@ const plantProfiles: Record<string, PlantProfile> = {
     optimalPh: "5.5 to 6.5",
     optimalTemperature: "22 to 30C",
     optimalHumidity: "50 to 70%",
+    ledSpectrumNeeds: {
+      seedling: "Warm spectrum (350-400µmol)",
+      vegetative: "Full spectrum for leaf density (450-550µmol)",
+      mature: "Increased red for oil production (500-650µmol)",
+    },
+    harvestReadyDays: 42,
     sensitivities: [
       "Very tolerant overall",
       "Slight sensitivity to nutrient deficiency",
@@ -159,10 +291,10 @@ function stageRange(stage: GrowthStage): [number, number] {
   switch (stage) {
     case "Seedling":
       return [20, 30]
-    case "Vegetative":
-      return [10, 20]
-    case "Mature":
-      return [3, 10]
+    case "Early Vegetative":
+      return [12, 18]
+    case "Mature Vegetative":
+      return [5, 12]
     case "Harvest Ready":
       return [1, 3]
     default:
@@ -545,7 +677,7 @@ export function PlantAIDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       <section className="glass-card relative overflow-hidden rounded-2xl border border-border/50 p-6">
         <div className="pointer-events-none absolute inset-0">
           <div
@@ -846,7 +978,29 @@ export function PlantAIDashboard() {
         </aside>
       </section>
 
-      <section className="rounded-2xl border border-neon-green/35 bg-gradient-to-br from-neon-green/10 to-neon-aqua/10 p-4">
+      {/* ENHANCED VERTICAL FARM INTELLIGENCE PANELS */}
+      <section className="space-y-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-foreground">Vertical Stack Intelligence</h2>
+            <p className="text-sm text-muted-foreground">Layer-specific monitoring, predictive risk, and harvest forecasting for multi-tier racks</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-7">
+            <VerticalLayerVisualization />
+          </div>
+
+          <div className="lg:col-span-5 space-y-6">
+            <PredictiveRiskAnalysis />
+            <HarvestOptimizationEngine />
+            <ResourceEfficiencyPanel />
+          </div>
+        </div>
+      </section>
+
+      <section className="glass-card border border-border/40 p-4">
         <div className="flex items-center gap-2 text-sm font-semibold text-neon-green">
           <Sparkles className="h-4 w-4" />
           AI Insight

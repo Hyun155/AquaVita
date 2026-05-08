@@ -6,7 +6,7 @@ import WaterDashboard from "@/components/environment/WaterDashboard";
  */
 export default function EnvironmentPage() {
   return (
-    <main className="min-h-screen bg-[#0B0F1A] flex flex-col">
+    <main className="min-h-screen bg-background flex flex-col">
       {/* Header Section */}
       <div className="p-8 pb-4">
         <h1 className="text-2xl font-bold text-white tracking-tight">

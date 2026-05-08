@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils"
 export function TopNavbar() {
   const [activeView, setActiveView] = useState<"hydro" | "aqua">("hydro")
   const [notifications] = useState(3)
+  // Light-only site: no theme toggle or dark mode handling
+  const [mounted] = useState(true)
 
   return (
     <header className="glass-card border-b border-border/50 px-6 py-4 sticky top-0 z-50">
@@ -73,6 +75,8 @@ export function TopNavbar() {
               </span>
             )}
           </button>
+
+          {/* Theme toggle removed for light-only site */}
 
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-aqua to-neon-blue flex items-center justify-center cursor-pointer hover:scale-105 transition-transform">
             <User className="w-5 h-5 text-background" />
