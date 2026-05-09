@@ -52,7 +52,6 @@ export function RecommendationCard({ recommendation, actionStatus, onManualOverr
           </span>
           <div>
             <p className="text-sm font-semibold tracking-tight text-foreground">{recommendation.plantName}</p>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Predictive AI advisory</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

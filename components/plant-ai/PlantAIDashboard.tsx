@@ -496,6 +496,8 @@ function buildRecommendations(plants: PlantTelemetry[]) {
         estimatedImpact: "2-6 hrs",
         confidence: 72,
         automatable: true,
+        layerId: plant.layerId,
+        type: "nutrient",
       })
     }
 
@@ -510,6 +512,8 @@ function buildRecommendations(plants: PlantTelemetry[]) {
         estimatedImpact: "2-6 hrs",
         confidence: 70,
         automatable: true,
+        layerId: plant.layerId,
+        type: "nutrient",
       })
     }
 
@@ -524,6 +528,8 @@ function buildRecommendations(plants: PlantTelemetry[]) {
         estimatedImpact: "6-24 hrs",
         confidence: 86,
         automatable: false,
+        layerId: plant.layerId,
+        type: "nutrient",
       })
     }
 
@@ -538,6 +544,8 @@ function buildRecommendations(plants: PlantTelemetry[]) {
         estimatedImpact: "1-4 hrs",
         confidence: 88,
         automatable: true,
+        layerId: plant.layerId,
+        type: "environmental",
       })
     }
   })
@@ -553,11 +561,13 @@ function buildRecommendations(plants: PlantTelemetry[]) {
       estimatedImpact: "—",
       confidence: 55,
       automatable: false,
+      layerId: 0,
+      type: "nutrient",
     })
   }
 
-  const severityRank = { critical: 0, warning: 1, info: 2 }
-  return recommendations.sort((a, b) => severityRank[a.severity] - severityRank[b.severity])
+  const severityRank = { critical: 0, warning: 1, info: 2, optimization: 3 }
+  return recommendations.sort((a, b) => (severityRank[a.severity] ?? 4) - (severityRank[b.severity] ?? 4))
 }
 
 export function PlantAIDashboard() {
@@ -1036,146 +1046,6 @@ export function PlantAIDashboard() {
         </aside>
       </section>
 
-      {/* SIMPLIFIED SECTION 1: RACK INTELLIGENCE OVERVIEW */}
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Rack Intelligence</h2>
-          <p className="text-xs text-muted-foreground">Quick view of all cultivation layers</p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 lg:grid-cols-4">
-          {plants.reduce((layers, plant) => {
-            const existing = layers.find((l) => l.layerId === plant.layerId)
-            if (!existing) {
-              layers.push({
-                layerId: plant.layerId,
-                plants: [plant],
-                avgHealth: plant.health,
-              })
-            } else {
-              existing.plants.push(plant)
-              existing.avgHealth = (existing.avgHealth + plant.health) / 2
-            }
-            return layers
-          }, [] as Array<{ layerId: number; plants: typeof plants; avgHealth: number }>).map((layer) => {
-            const avgTemp = layer.plants.reduce((sum, p) => sum + p.temperature, 0) / layer.plants.length
-            const avgHumidity = 65 // mock for demo
-            const healthStatus =
-              layer.avgHealth >= 85 ? "Optimal" : layer.avgHealth >= 70 ? "Good" : layer.avgHealth >= 50 ? "Needs Attention" : "Critical"
-            const statusColor =
-              layer.avgHealth >= 85 ? "text-neon-green" : layer.avgHealth >= 70 ? "text-neon-aqua" : layer.avgHealth >= 50 ? "text-warning" : "text-destructive"
-
-            return (
-              <div
-                key={layer.layerId}
-                className="rounded-xl border border-border/50 bg-secondary/25 p-4 hover:bg-secondary/40 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <p className="font-semibold text-sm text-foreground">Layer {layer.layerId}</p>
-                  <div
-                    className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
-                      layer.avgHealth >= 85
-                        ? "border-neon-green/30 bg-neon-green/10 text-neon-green"
-                        : layer.avgHealth >= 70
-                          ? "border-neon-aqua/30 bg-neon-aqua/10 text-neon-aqua"
-                          : layer.avgHealth >= 50
-                            ? "border-warning/30 bg-warning/10 text-warning"
-                            : "border-destructive/30 bg-destructive/10 text-destructive"
-                    }`}
-                  >
-                    {Math.round(layer.avgHealth)}%
-                  </div>
-                </div>
-
-                <div className="space-y-2 text-xs text-muted-foreground">
-                  <div className="flex justify-between">
-                    <span>Temperature</span>
-                    <span className="text-foreground font-medium">{avgTemp.toFixed(1)}°C</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Humidity</span>
-                    <span className="text-foreground font-medium">{avgHumidity}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Est. Yield</span>
-                    <span className="text-foreground font-medium">{layer.plants.length} plants</span>
-                  </div>
-                </div>
-
-                {/* Risk pill: quick predictive indicator */}
-                {(() => {
-                  const riskScore = Math.round((100 - layer.avgHealth) + Math.abs(avgTemp - 24) * 3)
-                  const timeToRisk = layer.avgHealth >= 85 ? null : Math.max(1, Math.round((80 - layer.avgHealth) / 4))
-                  const riskLabel = riskScore >= 90 ? 'Critical' : riskScore >= 70 ? 'High' : riskScore >= 45 ? 'Moderate' : 'Low'
-                  const pillStyle =
-                    riskLabel === 'Critical' ? 'border-destructive/30 bg-destructive/10 text-destructive' :
-                    riskLabel === 'High' ? 'border-warning/30 bg-warning/10 text-warning' :
-                    riskLabel === 'Moderate' ? 'border-neon-aqua/30 bg-neon-aqua/10 text-neon-aqua' : 'border-neon-green/30 bg-neon-green/10 text-neon-green'
-
-                  return (
-                    <div className="mt-3 flex items-center justify-between">
-                      <div className={`rounded-full px-3 py-1 text-xs font-semibold ${pillStyle}`}>Risk: {riskLabel}</div>
-                      <div className="text-xs text-muted-foreground">{timeToRisk ? `Time-to-risk: ${timeToRisk}h` : 'Stable'}</div>
-                    </div>
-                  )
-                })()}
-              </div>
-            )
-          })}
-        </div>
-      </section>
-
-      {/* SIMPLIFIED SECTION 2: SMART ALERTS */}
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Smart Alerts</h2>
-          <p className="text-xs text-muted-foreground">Top system recommendations</p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {recommendations.slice(0, 3).map((rec) => {
-            const severityStyles =
-              rec.severity === "critical"
-                ? "border-destructive/30 bg-destructive/10"
-                : rec.severity === "warning"
-                  ? "border-warning/30 bg-warning/10"
-                  : "border-neon-aqua/30 bg-neon-aqua/10"
-            const textColor =
-              rec.severity === "critical"
-                ? "text-destructive"
-                : rec.severity === "warning"
-                  ? "text-warning"
-                  : "text-neon-aqua"
-
-            const intervention = interventions.find((iv) => iv.plantId === rec.plantId && iv.status === "in-progress")
-
-            return (
-              <div key={rec.id} className={`rounded-xl border p-4 ${severityStyles}`}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1">
-                    <p className={`font-semibold text-sm ${textColor}`}>{rec.message}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {rec.plantName} · {rec.action ?? "AI review"} · {rec.estimatedImpact ?? "—"}
-                    </p>
-                  </div>
-                  {intervention && (
-                    <div className="text-xs font-semibold text-neon-green">
-                      ✓ Auto-responding
-                    </div>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-
-          {recommendations.length === 0 && (
-            <div className="col-span-full rounded-xl border border-neon-green/30 bg-neon-green/10 p-4 text-center">
-              <p className="text-sm font-medium text-neon-green">All systems healthy</p>
-              <p className="text-xs text-muted-foreground mt-1">No critical alerts</p>
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* SIMPLIFIED SECTION 3: HARVEST & EFFICIENCY */}
       <section className="space-y-4">

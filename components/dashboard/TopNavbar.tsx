@@ -33,33 +33,6 @@ export function TopNavbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="hidden lg:flex items-center gap-1 p-1 rounded-xl bg-secondary/50 border border-border/50">
-            <button
-              onClick={() => setActiveView("hydro")}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                activeView === "hydro"
-                  ? "bg-gradient-to-r from-neon-green/20 to-neon-aqua/20 text-neon-green"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <Droplets className="w-4 h-4" />
-              Hydroponics
-            </button>
-            <button
-              onClick={() => setActiveView("aqua")}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                activeView === "aqua"
-                  ? "bg-gradient-to-r from-neon-aqua/20 to-neon-blue/20 text-neon-aqua"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <Fish className="w-4 h-4" />
-              Aquaponics
-            </button>
-          </div>
-
           <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/30 border border-border/50">
             <Search className="w-4 h-4 text-muted-foreground" />
             <input
