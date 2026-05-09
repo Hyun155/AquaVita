@@ -5,6 +5,7 @@ import { MeshReflectorMaterial, OrbitControls } from "@react-three/drei"
 import { Bloom, EffectComposer } from "@react-three/postprocessing"
 import React, { Suspense, useMemo, useRef } from "react"
 import * as THREE from "three"
+import { useSuppressExtensions } from "@/hooks/useSuppressExtensions"
 
 type LayerData = {
   id: number
@@ -31,6 +32,7 @@ export default function VerticalFarmView({
   onSelectLayer,
   onLayerClick,
 }: VerticalFarmViewProps) {
+  useSuppressExtensions()
   const plantPositions = useMemo(() => {
     const positions: [number, number, number][] = []
     const cols = 4

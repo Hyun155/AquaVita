@@ -14,8 +14,8 @@ import { growthData } from "@/lib/mockData"
 const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="glass-card rounded-lg p-3 border border-border/50">
-        <p className="text-sm font-medium text-foreground mb-1">{label}</p>
+      <div className="rounded-xl border border-slate-200/80 bg-white/95 p-3 shadow-lg backdrop-blur-sm">
+        <p className="mb-1 text-sm font-medium text-slate-900">{label}</p>
         {payload.map((entry, index) => (
           <p key={index} className="text-xs" style={{ color: entry.color }}>
             {entry.name}: {entry.value}
@@ -30,12 +30,12 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
 
 export function GrowthChart() {
   return (
-    <div className="glass-card rounded-2xl p-6">
+    <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-foreground">Plant Growth Trend</h3>
-        <p className="text-xs text-muted-foreground">Daily growth rate vs optimal</p>
+        <h3 className="text-sm font-semibold text-slate-900">Plant Growth Trend</h3>
+        <p className="text-xs text-slate-500">Daily growth rate vs optimal</p>
       </div>
-      <div className="h-48">
+      <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={growthData}>
             <defs>
@@ -44,9 +44,9 @@ export function GrowthChart() {
                 <stop offset="95%" stopColor="oklch(0.8 0.25 140)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.22 0.02 220)" />
-            <XAxis dataKey="day" tick={{ fill: "oklch(0.6 0.01 180)", fontSize: 11 }} axisLine={false} />
-            <YAxis tick={{ fill: "oklch(0.6 0.01 180)", fontSize: 11 }} axisLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.18)" />
+            <XAxis dataKey="day" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
             <Tooltip content={<CustomTooltip />} />
             <Area
               type="monotone"

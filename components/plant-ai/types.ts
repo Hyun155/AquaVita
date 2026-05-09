@@ -70,8 +70,9 @@ export interface PlantRecommendation {
   severity: RecommendationSeverity
   type: RecommendationType
   message: string
-  action: string
-  estimatedImpact: string
+  action?: string
+  estimatedImpact?: string
+  confidence?: number
   automatable: boolean
 }
 

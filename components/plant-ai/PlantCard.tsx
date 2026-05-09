@@ -80,14 +80,14 @@ export function PlantCard(props: PlantCardProps) {
   const displayedTemperature = useCountUp(plant.temperature, 900, 1)
   const displayedDaysToHarvest = useCountUp(daysToHarvest, 950)
   const displayedRecoveryProgress = useCountUp(props.recoveryProgress ?? 0, 700)
-  const profileToneClass = isCritical ? "from-destructive/25 via-slate-950/90 to-slate-950" : "from-neon-aqua/22 via-slate-950/90 to-slate-950"
+  const profileToneClass = isCritical ? "from-white/90 via-slate-50/80 to-cyan-50/70" : "from-white/90 via-slate-50/80 to-cyan-50/70"
 
   return (
     <article className={`group glass-card relative overflow-hidden rounded-2xl border p-5 transition-all duration-500 ${isCritical ? "border-destructive/45 shadow-[0_0_28px_oklch(0.62_0.24_23/0.2)]" : "border-border/50 hover:border-neon-aqua/40 hover:shadow-[0_0_34px_oklch(0.75_0.2_195/0.25)]"}`}>
       <div className="pointer-events-none absolute -inset-6 rounded-3xl bg-[radial-gradient(circle_at_20%_10%,oklch(0.76_0.17_190/0.28),transparent_60%)] opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
       {isCritical && <div className="pointer-events-none absolute inset-0 animate-pulse bg-destructive/5" />}
 
-      <div className="mb-5 flex items-start justify-between gap-3">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h3 className="text-base font-semibold text-foreground">{plant.name}</h3>
           <p className="text-xs text-muted-foreground">AI growth tracking active</p>
@@ -101,17 +101,32 @@ export function PlantCard(props: PlantCardProps) {
         </div>
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-xl border border-border/40 bg-secondary/30 p-3">
-          <p className="text-xs text-muted-foreground">Growth Stage</p>
-          <p className="mt-1 font-medium text-neon-aqua">{plant.stage}</p>
+      <div className="mb-3 flex items-center justify-between gap-3 text-sm">
+        <div className="flex items-center gap-3">
+          <div className="text-xs text-muted-foreground">
+            <div>Stage</div>
+            <div className="font-medium text-neon-aqua">{plant.stage}</div>
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            <div>Harvest</div>
+            <div className="font-medium text-neon-green">{Math.round(displayedDaysToHarvest)}d</div>
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            <div>pH</div>
+            <div className="font-medium text-foreground">{displayedPh.toFixed(2)}</div>
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            <div>Temp</div>
+            <div className="font-medium text-foreground">{displayedTemperature.toFixed(1)}°C</div>
+          </div>
         </div>
-        <div className="rounded-xl border border-border/40 bg-secondary/30 p-3">
-          <p className="text-xs text-muted-foreground">Days to Harvest</p>
-          <p className="mt-1 flex items-center gap-1.5 font-medium text-neon-green">
-            <CalendarClock className="h-4 w-4" />
-            {Math.round(displayedDaysToHarvest)} days
-          </p>
+
+        <div className="text-xs text-muted-foreground">
+          <div>Health</div>
+          <div className="font-semibold text-foreground text-lg">{Math.round(displayedHealth)}%</div>
         </div>
       </div>
 
@@ -187,86 +202,86 @@ export function PlantCard(props: PlantCardProps) {
 
         <SheetContent
           side="right"
-          className="w-full border-border/40 bg-gradient-to-b from-slate-950 via-slate-950 to-background p-0 text-foreground sm:max-w-[34rem]"
+          className="w-full border-slate-200/60 bg-gradient-to-b from-slate-50/95 via-white/90 to-cyan-50/80 p-0 text-foreground shadow-[0_0_0_1px_rgba(255,255,255,0.45),0_32px_80px_rgba(15,23,42,0.28)] sm:max-w-[34rem]"
         >
-          <div className={`relative h-full overflow-hidden ${isCritical ? "bg-[radial-gradient(circle_at_top_right,oklch(0.66_0.23_24/0.18),transparent_36%)]" : "bg-[radial-gradient(circle_at_top_right,oklch(0.76_0.17_190/0.18),transparent_36%)]"}`}>
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.04),transparent_20%,transparent_80%,rgba(255,255,255,0.03))]" />
-            <div className={`pointer-events-none absolute -right-20 top-14 h-44 w-44 rounded-full blur-3xl ${isCritical ? "bg-destructive/20" : "bg-neon-aqua/20"}`} />
+          <div className="relative h-full overflow-hidden bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.14),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.72),transparent_36%)]">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.58),rgba(255,255,255,0.18)_18%,transparent_72%,rgba(148,163,184,0.08))]" />
+            <div className="pointer-events-none absolute -right-20 top-14 h-44 w-44 rounded-full bg-neon-aqua/14 blur-3xl" />
             <div className="relative flex h-full flex-col">
-              <SheetHeader className="border-b border-white/10 px-6 py-6 text-left">
+              <SheetHeader className="border-b border-slate-200/70 bg-white/35 px-6 py-6 text-left backdrop-blur-xl">
                 <SheetTitle className="flex items-center gap-3 text-2xl">
-                  <span className={`flex h-11 w-11 items-center justify-center rounded-2xl border ${isCritical ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-neon-aqua/40 bg-neon-aqua/10 text-neon-aqua"}`}>
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-neon-aqua/30 bg-white/75 text-neon-aqua shadow-sm">
                     <Sparkles className="h-5 w-5" />
                   </span>
                   <span>
                     {profile.displayName}
-                    <span className="mt-1 block text-sm font-normal text-muted-foreground">{profile.scientificName}</span>
+                    <span className="mt-1 block text-sm font-normal text-slate-500">{profile.scientificName}</span>
                   </span>
                 </SheetTitle>
-                <SheetDescription className="mt-2 max-w-xl text-sm leading-relaxed">
-                  Interactive plant intelligence profile with optimal conditions, sensitivities, and simulation behavior.
+                <SheetDescription className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600">
+                  Clean inspection view for optimal conditions, sensitivities, and simulation behavior.
                 </SheetDescription>
               </SheetHeader>
 
               <div className="flex-1 overflow-y-auto px-6 py-6">
-                <div className={`rounded-3xl border border-white/10 bg-gradient-to-br ${profileToneClass} p-[1px] shadow-[0_0_30px_oklch(0.75_0.2_195/0.14)]`}>
-                  <div className="space-y-5 rounded-[1.4rem] border border-white/5 bg-slate-950/60 p-5 backdrop-blur-xl">
+                  <div className={`rounded-3xl border border-slate-200/70 bg-gradient-to-br ${profileToneClass} p-[1px] shadow-[0_18px_50px_rgba(15,23,42,0.12)]`}>
+                    <div className="space-y-5 rounded-[1.4rem] border border-white/70 bg-white/70 p-5 backdrop-blur-2xl">
                     <div className="flex flex-wrap items-center gap-3">
-                      <span className="rounded-full border border-neon-aqua/30 bg-neon-aqua/10 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-neon-aqua">
+                      <span className="rounded-full border border-neon-aqua/25 bg-neon-aqua/10 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-cyan-700">
                         Plant Intelligence Profile
                       </span>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      <span className="rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-slate-500">
                         Active Monitoring
                       </span>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                      <span className="rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-slate-500">
                         {isCritical ? "Critical Sensitivity" : "Stable Sensitivity"}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 text-[11px] sm:grid-cols-4">
-                      <div className="rounded-2xl border border-white/8 bg-white/5 p-3">
-                        <p className="text-muted-foreground">Growth</p>
-                        <p className="mt-1 font-medium text-foreground">{profile.growthSpeed}</p>
+                      <div className="grid grid-cols-2 gap-3 text-[11px] sm:grid-cols-4">
+                      <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-3">
+                        <p className="text-slate-500">Growth</p>
+                        <p className="mt-1 font-medium text-slate-900">{profile.growthSpeed}</p>
                       </div>
-                      <div className="rounded-2xl border border-white/8 bg-white/5 p-3">
-                        <p className="text-muted-foreground">pH</p>
-                        <p className="mt-1 font-medium text-foreground">{profile.optimalPh}</p>
+                      <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-3">
+                        <p className="text-slate-500">pH</p>
+                        <p className="mt-1 font-medium text-slate-900">{profile.optimalPh}</p>
                       </div>
-                      <div className="rounded-2xl border border-white/8 bg-white/5 p-3">
-                        <p className="text-muted-foreground">Temp</p>
-                        <p className="mt-1 font-medium text-foreground">{profile.optimalTemperature}</p>
+                      <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-3">
+                        <p className="text-slate-500">Temp</p>
+                        <p className="mt-1 font-medium text-slate-900">{profile.optimalTemperature}</p>
                       </div>
-                      <div className="rounded-2xl border border-white/8 bg-white/5 p-3">
-                        <p className="text-muted-foreground">Humidity</p>
-                        <p className="mt-1 font-medium text-foreground">{profile.optimalHumidity ?? "—"}</p>
+                      <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-3">
+                        <p className="text-slate-500">Humidity</p>
+                        <p className="mt-1 font-medium text-slate-900">{profile.optimalHumidity ?? "—"}</p>
                       </div>
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2">
-                      <div className="rounded-2xl border border-neon-aqua/20 bg-black/20 p-4">
-                        <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-aqua">
+                      <div className="rounded-2xl border border-slate-200/70 bg-white/85 p-4 shadow-sm">
+                        <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-700">
                           <Radar className="h-3.5 w-3.5" />
                           Sensitivity Matrix
                         </div>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
+                        <ul className="space-y-2 text-sm text-slate-600">
                           {profile.sensitivities.map((item) => (
                             <li key={item} className="flex items-start gap-2">
-                              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-neon-aqua shadow-[0_0_10px_oklch(0.75_0.2_195/0.55)]" />
+                              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-neon-aqua shadow-[0_0_10px_oklch(0.75_0.2_195/0.45)]" />
                               <span>{item}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
 
-                      <div className="rounded-2xl border border-neon-green/20 bg-black/20 p-4">
-                        <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-green">
+                      <div className="rounded-2xl border border-slate-200/70 bg-white/85 p-4 shadow-sm">
+                        <div className="mb-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
                           <ArrowRight className="h-3.5 w-3.5" />
                           Behavior Model
                         </div>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
+                        <ul className="space-y-2 text-sm text-slate-600">
                           {profile.simulationBehavior.map((item) => (
                             <li key={item} className="flex items-start gap-2">
-                              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-neon-green shadow-[0_0_10px_oklch(0.79_0.22_150/0.45)]" />
+                              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_oklch(0.79_0.22_150/0.35)]" />
                               <span>{item}</span>
                             </li>
                           ))}
@@ -275,15 +290,15 @@ export function PlantCard(props: PlantCardProps) {
                     </div>
 
                     <div className="grid gap-4 md:grid-cols-2">
-                      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground/80">Ideal For</p>
-                        <p className="mt-2 text-sm text-muted-foreground">{profile.idealFor ?? "General hydroponic use"}</p>
-                        {profile.leafTypeOrStructure && <p className="mt-2 text-sm text-muted-foreground">{profile.leafTypeOrStructure}</p>}
+                      <div className="rounded-2xl border border-slate-200/70 bg-white/85 p-4 shadow-sm">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">Ideal For</p>
+                        <p className="mt-2 text-sm text-slate-600">{profile.idealFor ?? "General hydroponic use"}</p>
+                        {profile.leafTypeOrStructure && <p className="mt-2 text-sm text-slate-600">{profile.leafTypeOrStructure}</p>}
                       </div>
 
-                      <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-foreground/80">Common Issues</p>
-                        <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
+                      <div className="rounded-2xl border border-slate-200/70 bg-white/85 p-4 shadow-sm">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">Common Issues</p>
+                        <ul className="mt-3 space-y-2 text-sm text-slate-600">
                           {profile.commonIssues.map((item) => (
                             <li key={item} className="flex items-start gap-2">
                               <span className="mt-1 h-1.5 w-1.5 rounded-full bg-warning shadow-[0_0_10px_oklch(0.78_0.17_85/0.45)]" />
@@ -294,32 +309,32 @@ export function PlantCard(props: PlantCardProps) {
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-border/40 bg-secondary/20 p-4">
+                    <div className="rounded-2xl border border-slate-200/70 bg-white/85 p-4 shadow-sm">
                       <div className="mb-3 flex items-center justify-between gap-3">
                         <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-aqua">Live Telemetry</p>
-                          <p className="text-sm text-muted-foreground">Current health, pH, temperature, and recovery status</p>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-700">Live Telemetry</p>
+                          <p className="text-sm text-slate-600">Current health, pH, temperature, and recovery status</p>
                         </div>
-                        <div className="rounded-full border border-neon-aqua/30 bg-neon-aqua/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-neon-aqua">
+                        <div className="rounded-full border border-neon-aqua/25 bg-neon-aqua/10 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-cyan-700">
                           Synced
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
-                        <div className="rounded-xl border border-border/40 bg-background/40 p-3">
-                          <p className="text-muted-foreground">Health</p>
-                          <p className="mt-1 text-base font-semibold text-foreground">{Math.round(displayedHealth)}%</p>
+                        <div className="rounded-xl border border-slate-200/70 bg-slate-50/90 p-3">
+                          <p className="text-slate-500">Health</p>
+                          <p className="mt-1 text-base font-semibold text-slate-900">{Math.round(displayedHealth)}%</p>
                         </div>
-                        <div className="rounded-xl border border-border/40 bg-background/40 p-3">
-                          <p className="text-muted-foreground">pH</p>
-                          <p className="mt-1 text-base font-semibold text-foreground">{displayedPh.toFixed(2)}</p>
+                        <div className="rounded-xl border border-slate-200/70 bg-slate-50/90 p-3">
+                          <p className="text-slate-500">pH</p>
+                          <p className="mt-1 text-base font-semibold text-slate-900">{displayedPh.toFixed(2)}</p>
                         </div>
-                        <div className="rounded-xl border border-border/40 bg-background/40 p-3">
-                          <p className="text-muted-foreground">Temp</p>
-                          <p className="mt-1 text-base font-semibold text-foreground">{displayedTemperature.toFixed(1)}°C</p>
+                        <div className="rounded-xl border border-slate-200/70 bg-slate-50/90 p-3">
+                          <p className="text-slate-500">Temp</p>
+                          <p className="mt-1 text-base font-semibold text-slate-900">{displayedTemperature.toFixed(1)}°C</p>
                         </div>
-                        <div className="rounded-xl border border-border/40 bg-background/40 p-3">
-                          <p className="text-muted-foreground">TTF</p>
-                          <p className="mt-1 text-base font-semibold text-foreground">{props.timeToFailureHours ?? "—"}h</p>
+                        <div className="rounded-xl border border-slate-200/70 bg-slate-50/90 p-3">
+                          <p className="text-slate-500">TTF</p>
+                          <p className="mt-1 text-base font-semibold text-slate-900">{props.timeToFailureHours ?? "—"}h</p>
                         </div>
                       </div>
                     </div>
@@ -327,11 +342,11 @@ export function PlantCard(props: PlantCardProps) {
                 </div>
               </div>
 
-              <div className="border-t border-white/10 px-6 py-4">
+              <div className="border-t border-slate-200/70 bg-white/40 px-6 py-4 backdrop-blur-xl">
                 <SheetClose asChild>
                   <button
                     type="button"
-                    className="inline-flex w-full items-center justify-center rounded-2xl border border-neon-aqua/30 bg-neon-aqua/10 px-4 py-3 text-sm font-medium text-neon-aqua transition-all duration-300 hover:border-neon-aqua/50 hover:bg-neon-aqua/15 hover:shadow-[0_0_24px_oklch(0.75_0.2_195/0.18)]"
+                    className="inline-flex w-full items-center justify-center rounded-2xl border border-neon-aqua/30 bg-white/80 px-4 py-3 text-sm font-medium text-cyan-700 transition-all duration-300 hover:border-neon-aqua/50 hover:bg-cyan-50 hover:shadow-[0_0_24px_oklch(0.75_0.2_195/0.12)]"
                   >
                     Close profile
                   </button>

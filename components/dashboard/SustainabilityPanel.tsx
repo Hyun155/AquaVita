@@ -60,24 +60,24 @@ export function SustainabilityPanel() {
   )
 
   return (
-    <div className="glass-card rounded-2xl p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm">
+      <div className="mb-5 flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Sustainability Index</h2>
-          <p className="text-sm text-muted-foreground">Environmental impact metrics</p>
+          <h2 className="text-lg font-semibold text-slate-900">Sustainability Index</h2>
+          <p className="text-sm text-slate-500">Environmental impact metrics</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-neon-green/20 to-neon-aqua/10 border border-neon-green/30 transition-all duration-1000 animate-pulse">
-          <Award className="w-5 h-5 text-neon-green" />
-          <span className="text-lg font-bold text-neon-green">{overallScore}</span>
-          <span className="text-xs text-muted-foreground">/100</span>
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 shadow-sm">
+          <Award className="w-5 h-5 text-emerald-600" />
+          <span className="text-lg font-semibold text-emerald-700">{overallScore}</span>
+          <span className="text-xs text-slate-500">/100</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="mb-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         {sustainabilityMetrics.map((metric, index) => (
           <div
             key={index}
-            className="glass-card rounded-xl p-4 border border-border/50 hover:scale-105 transition-all duration-300"
+            className="rounded-xl border border-slate-200/80 bg-slate-50/90 p-4 transition-transform duration-300 hover:-translate-y-0.5"
             style={{
               opacity: scores[metric.label] !== undefined ? 1 : 0,
               transform: scores[metric.label] !== undefined ? "translateY(0)" : "translateY(10px)",
@@ -87,16 +87,16 @@ export function SustainabilityPanel() {
             <div className="p-2 rounded-lg w-fit mb-3" style={{ backgroundColor: `${metric.color}20` }}>
               <metric.icon className="w-4 h-4" style={{ color: metric.color }} />
             </div>
-            <p className="text-xs text-muted-foreground mb-1">{metric.label}</p>
+            <p className="mb-1 text-xs text-slate-500">{metric.label}</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold" style={{ color: metric.color }}>
+              <span className="text-2xl font-semibold" style={{ color: metric.color }}>
                 {scores[metric.label] ?? 0}
               </span>
-              <span className="text-sm text-muted-foreground">{metric.unit}</span>
+              <span className="text-sm text-slate-500">{metric.unit}</span>
             </div>
             <div className="flex items-center gap-1 mt-2">
-              <TrendingUp className="w-3 h-3 text-success" />
-              <span className="text-xs text-success">{metric.trend}</span>
+              <TrendingUp className="w-3 h-3 text-emerald-600" />
+              <span className="text-xs text-emerald-600">{metric.trend}</span>
             </div>
           </div>
         ))}
@@ -104,24 +104,24 @@ export function SustainabilityPanel() {
 
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-foreground">Eco-Efficiency Progress</span>
-          <span className="text-sm text-neon-green font-medium">{overallScore}%</span>
+          <span className="text-sm font-medium text-slate-700">Eco-Efficiency Progress</span>
+          <span className="text-sm font-semibold text-emerald-700">{overallScore}%</span>
         </div>
-        <div className="h-3 rounded-full bg-secondary/50 overflow-hidden">
+        <div className="h-3 overflow-hidden rounded-full bg-slate-100">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-neon-green via-neon-aqua to-neon-blue transition-all duration-1000"
+            className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-emerald-300 transition-all duration-1000"
             style={{ width: `${overallScore}%` }}
           />
         </div>
       </div>
 
-      <div>
-        <h3 className="text-sm font-medium text-foreground mb-4">Achievement Badges</h3>
-        <div className="flex flex-wrap gap-3">
+      <div className="mb-6">
+        <h3 className="mb-4 text-sm font-medium text-slate-700">Achievement Badges</h3>
+        <div className="flex flex-wrap gap-2.5">
           {badges.map((badge, index) => (
             <div
               key={index}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r ${getTierStyles(
+              className={`flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 bg-gradient-to-r ${getTierStyles(
                 badge.tier,
               )} transition-all duration-500 hover:scale-105 ${
                 unlockedBadges.has(badge.name)
@@ -133,23 +133,22 @@ export function SustainabilityPanel() {
               }}
             >
               <badge.icon className="w-4 h-4" />
-              <span className="text-xs font-bold uppercase tracking-wide">{badge.name}</span>
+              <span className="text-xs font-semibold uppercase tracking-wide">{badge.name}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-neon-green/10 to-neon-aqua/5 border border-neon-green/20">
+      <div className="rounded-xl border border-cyan-200 bg-cyan-50/80 p-4">
         <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-neon-green/20">
-            <Leaf className="w-5 h-5 text-neon-green" />
+          <div className="rounded-lg bg-white/80 p-2 shadow-sm">
+            <Leaf className="w-5 h-5 text-emerald-600" />
           </div>
           <div>
-            <h4 className="text-sm font-medium text-neon-green mb-1">Environmental Impact</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Your farm has saved <span className="text-neon-aqua font-medium">12,450 liters</span> of water this month
-              and converted <span className="text-neon-green font-medium">156 kg</span> of organic waste into fertilizer.
-              Keep up the great work!
+            <h4 className="mb-1 text-sm font-medium text-emerald-700">Environmental Impact</h4>
+            <p className="text-xs leading-relaxed text-slate-600">
+              Your farm has saved <span className="font-medium text-cyan-700">12,450 liters</span> of water this month and converted <span className="font-medium text-emerald-700">156 kg</span> of organic waste into fertilizer.
+              Keep the optimization loop steady.
             </p>
           </div>
         </div>

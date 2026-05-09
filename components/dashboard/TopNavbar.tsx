@@ -3,12 +3,14 @@
 import { useState } from "react"
 import { Bell, Leaf, Wifi, Fish, Droplets, Search, User } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useSuppressExtensions } from "@/hooks/useSuppressExtensions"
 
 export function TopNavbar() {
   const [activeView, setActiveView] = useState<"hydro" | "aqua">("hydro")
   const [notifications] = useState(3)
   // Light-only site: no theme toggle or dark mode handling
   const [mounted] = useState(true)
+  useSuppressExtensions()
 
   return (
     <header className="glass-card border-b border-border/50 px-6 py-4 sticky top-0 z-50">

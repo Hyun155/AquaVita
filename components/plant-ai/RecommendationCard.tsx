@@ -52,7 +52,7 @@ export function RecommendationCard({ recommendation, actionStatus, onManualOverr
           </span>
           <div>
             <p className="text-sm font-semibold tracking-tight text-foreground">{recommendation.plantName}</p>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Priority advisory</p>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Predictive AI advisory</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -67,13 +67,23 @@ export function RecommendationCard({ recommendation, actionStatus, onManualOverr
           )}
         </div>
       </div>
-      <p className="relative text-xs leading-relaxed text-muted-foreground">{recommendation.message}</p>
-      <div className="relative mt-3 flex items-center justify-end">
-        <div className="flex items-center gap-2">
+      <p className="relative text-sm leading-snug text-foreground mb-2">{recommendation.message}</p>
+
+      <div className="flex items-center justify-between gap-3"> 
+        <div className="text-xs text-muted-foreground">
+          <div className="mb-1">AI action: <span className="font-medium text-foreground">{recommendation.action ?? 'Review conditions'}</span></div>
+          <div className="mb-1">Confidence: <span className="font-semibold text-foreground">{recommendation.confidence ?? 60}%</span></div>
+          <div>Expected gain: <span className="font-medium text-foreground">{recommendation.estimatedImpact ?? '—'}</span></div>
+        </div>
+
+        <div className="flex flex-col items-end gap-2">
           {onManualOverride && actionStatus === "in-progress" && (
             <Button size="sm" variant="ghost" className="border border-border/40 bg-background/40 text-xs text-foreground shadow-sm transition-colors hover:bg-secondary/30" onClick={onManualOverride}>
               Manual Override
             </Button>
+          )}
+          {recommendation.automatable && (
+            <span className="text-[11px] rounded-full border border-neon-aqua/30 bg-neon-aqua/8 px-2 py-1 text-neon-aqua">Automatable</span>
           )}
         </div>
       </div>

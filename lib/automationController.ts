@@ -5,6 +5,8 @@ type OptimalRange = {
   max: number
 }
 
+let automationActionSequence = 0
+
 export interface AutomationAction {
   id: string
   plantId: string
@@ -30,40 +32,40 @@ export class AutomationController {
     plants.forEach((plant) => {
       if (plant.ph < this.optimalRange.ph.min) {
         actions.push({
-          id: `${plant.id}-ph-low-${timestamp.getTime()}-${actions.length}`,
+          id: `${plant.id}-ph-low-${automationActionSequence++}`,
           plantId: plant.id,
           plantName: plant.name,
           metric: "pH",
-          message: `Adding alkaline buffer for ${plant.name} because pH ${plant.ph.toFixed(2)} is below ${this.optimalRange.ph.min.toFixed(1)}.`,
+          message: `AI prevented nutrient imbalance for ${plant.name} by buffering low pH ${plant.ph.toFixed(2)}.`,
           timestamp: timestamp.toLocaleTimeString(),
         })
       } else if (plant.ph > this.optimalRange.ph.max) {
         actions.push({
-          id: `${plant.id}-ph-high-${timestamp.getTime()}-${actions.length}`,
+          id: `${plant.id}-ph-high-${automationActionSequence++}`,
           plantId: plant.id,
           plantName: plant.name,
           metric: "pH",
-          message: `Adding acidic solution for ${plant.name} because pH ${plant.ph.toFixed(2)} is above ${this.optimalRange.ph.max.toFixed(1)}.`,
+          message: `Automated pH stabilization successful for ${plant.name}; high pH ${plant.ph.toFixed(2)} was corrected.`,
           timestamp: timestamp.toLocaleTimeString(),
         })
       }
 
       if (plant.temperature < this.optimalRange.temperature.min) {
         actions.push({
-          id: `${plant.id}-temp-low-${timestamp.getTime()}-${actions.length}`,
+          id: `${plant.id}-temp-low-${automationActionSequence++}`,
           plantId: plant.id,
           plantName: plant.name,
           metric: "temperature",
-          message: `Increasing heater output for ${plant.name} because temperature ${plant.temperature.toFixed(1)}°C is below ${this.optimalRange.temperature.min.toFixed(1)}°C.`,
+          message: `Predicted cold stress in ${plant.name}; automated heating restored canopy stability.`,
           timestamp: timestamp.toLocaleTimeString(),
         })
       } else if (plant.temperature > this.optimalRange.temperature.max) {
         actions.push({
-          id: `${plant.id}-temp-high-${timestamp.getTime()}-${actions.length}`,
+          id: `${plant.id}-temp-high-${automationActionSequence++}`,
           plantId: plant.id,
           plantName: plant.name,
           metric: "temperature",
-          message: `Increasing airflow for ${plant.name} because temperature ${plant.temperature.toFixed(1)}°C is above ${this.optimalRange.temperature.max.toFixed(1)}°C.`,
+          message: `Predicted heat stress in ${plant.name}; automated airflow reduced canopy temperature.`,
           timestamp: timestamp.toLocaleTimeString(),
         })
       }

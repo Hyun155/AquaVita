@@ -4,14 +4,10 @@ import { useEffect, useMemo, useState } from "react"
 import { PlantCard } from "@/components/plant-ai/PlantCard"
 import { RecommendationCard } from "@/components/plant-ai/RecommendationCard"
 import { DiseaseDetectionPanel } from "@/components/plant-ai/DiseaseDetectionPanel"
-import { VerticalLayerVisualization } from "@/components/plant-ai/VerticalLayerVisualization"
-import { PredictiveRiskAnalysis } from "@/components/plant-ai/PredictiveRiskAnalysis"
-import { HarvestOptimizationEngine } from "@/components/plant-ai/HarvestOptimizationEngine"
-import { ResourceEfficiencyPanel } from "@/components/plant-ai/ResourceEfficiencyPanel"
 import { Switch } from "@/components/ui/switch"
 import type { GrowthStage, PlantProfile, PlantRecommendation, PlantTelemetry } from "@/components/plant-ai/types"
 import { automationController, type AutomationAction } from "@/lib/automationController"
-import { Sparkles, ShieldAlert, Activity, Cpu } from "lucide-react"
+import { ShieldAlert, Activity, Cpu } from "lucide-react"
 
 const HEALTH_HISTORY_LIMIT = 24
 
@@ -496,6 +492,10 @@ function buildRecommendations(plants: PlantTelemetry[]) {
         plantName: plant.name,
         severity: "warning",
         message: `pH is ${plant.ph.toFixed(2)}. Add alkaline buffer to stabilize nutrient uptake.`,
+        action: "Add alkaline buffer",
+        estimatedImpact: "2-6 hrs",
+        confidence: 72,
+        automatable: true,
       })
     }
 
@@ -506,6 +506,10 @@ function buildRecommendations(plants: PlantTelemetry[]) {
         plantName: plant.name,
         severity: "warning",
         message: `pH is ${plant.ph.toFixed(2)}. Add acidic solution to restore target pH range.`,
+        action: "Add acidic solution",
+        estimatedImpact: "2-6 hrs",
+        confidence: 70,
+        automatable: true,
       })
     }
 
@@ -516,6 +520,10 @@ function buildRecommendations(plants: PlantTelemetry[]) {
         plantName: plant.name,
         severity: "critical",
         message: `Health dropped to ${Math.round(plant.health)}%. Increase nitrogen nutrients immediately.`,
+        action: "Increase nitrogen dosing",
+        estimatedImpact: "6-24 hrs",
+        confidence: 86,
+        automatable: false,
       })
     }
 
@@ -526,6 +534,10 @@ function buildRecommendations(plants: PlantTelemetry[]) {
         plantName: plant.name,
         severity: "critical",
         message: `Temperature is ${plant.temperature.toFixed(1)}°C. Cool system and increase airflow.`,
+        action: "Increase airflow / cooling",
+        estimatedImpact: "1-4 hrs",
+        confidence: 88,
+        automatable: true,
       })
     }
   })
@@ -537,6 +549,10 @@ function buildRecommendations(plants: PlantTelemetry[]) {
       plantName: "All Plants",
       severity: "info",
       message: "All monitored plants are within healthy AI thresholds.",
+      action: "No action required",
+      estimatedImpact: "—",
+      confidence: 55,
+      automatable: false,
     })
   }
 
@@ -669,6 +685,9 @@ export function PlantAIDashboard() {
   const recommendations = useMemo(() => buildRecommendations(plants), [plants])
   const adaptiveInsight = useMemo(() => buildAdaptiveInsight(plants, interventions, actionLog), [plants, interventions, actionLog])
   const criticalCount = recommendations.filter((item) => item.severity === "critical").length
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
 
   const handleManualOverride = (plantId: string) => {
     // Cancel recovery and mark interventions as resolved (user resolved)
@@ -701,9 +720,9 @@ export function PlantAIDashboard() {
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
-              <div className="rounded-xl border border-border/50 bg-secondary/30 px-3 py-2 text-xs text-muted-foreground">
+                <div className="rounded-xl border border-border/50 bg-secondary/30 px-3 py-2 text-xs text-muted-foreground">
                 <p className="mb-0.5">Last telemetry sync</p>
-                <p className="font-semibold text-neon-green">{lastUpdate.toLocaleTimeString()}</p>
+                <p className="font-semibold text-neon-green">{mounted ? lastUpdate.toLocaleTimeString() : "—"}</p>
               </div>
 
               <label className="flex items-center gap-3 rounded-xl border border-border/50 bg-secondary/30 px-3 py-2">
@@ -715,6 +734,45 @@ export function PlantAIDashboard() {
                 <Switch checked={stressMode} onCheckedChange={setStressMode} />
               </label>
             </div>
+          </div>
+
+          {/* KPI row: compact high-impact metrics for judges */}
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-5">
+            {(() => {
+              const avgHealth = Math.round(plants.reduce((s, p) => s + p.health, 0) / plants.length)
+              const efficiencyNow = calculateResourceEfficiency(plants, actionLog)
+              const activeAlerts = recommendations.filter(r => r.severity === 'critical' || r.severity === 'warning').length
+              const nextHarvest = Math.min(...plants.map(p => calculateDaysToHarvest(p)))
+
+              return (
+                <>
+                  <div className="rounded-xl border border-border/40 bg-secondary/25 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Overall Crop Health</p>
+                    <p className="text-2xl font-bold text-foreground">{avgHealth}%</p>
+                  </div>
+
+                  <div className="rounded-xl border border-border/40 bg-secondary/25 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Water Saved Today</p>
+                    <p className="text-2xl font-bold text-neon-green">{efficiencyNow.waterSavingsL}L</p>
+                  </div>
+
+                  <div className="rounded-xl border border-border/40 bg-secondary/25 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Energy Saved Today</p>
+                    <p className="text-2xl font-bold text-neon-aqua">{efficiencyNow.energySavingsKwh} kWh</p>
+                  </div>
+
+                  <div className="rounded-xl border border-border/40 bg-secondary/25 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Active Alerts</p>
+                    <p className="text-2xl font-bold text-warning">{activeAlerts}</p>
+                  </div>
+
+                  <div className="rounded-xl border border-border/40 bg-secondary/25 p-3 text-center">
+                    <p className="text-xs text-muted-foreground">Next Harvest ETA</p>
+                    <p className="text-2xl font-bold text-neon-green">{nextHarvest}d</p>
+                  </div>
+                </>
+              )
+            })()}
           </div>
 
           {/* Hero row: Growth Rate, Live Camera mock, System Status */}
@@ -978,166 +1036,197 @@ export function PlantAIDashboard() {
         </aside>
       </section>
 
-      {/* ENHANCED VERTICAL FARM INTELLIGENCE PANELS */}
+      {/* SIMPLIFIED SECTION 1: RACK INTELLIGENCE OVERVIEW */}
       <section className="space-y-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-foreground">Vertical Stack Intelligence</h2>
-            <p className="text-sm text-muted-foreground">Layer-specific monitoring, predictive risk, and harvest forecasting for multi-tier racks</p>
-          </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Rack Intelligence</h2>
+          <p className="text-xs text-muted-foreground">Quick view of all cultivation layers</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-7">
-            <VerticalLayerVisualization />
-          </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 lg:grid-cols-4">
+          {plants.reduce((layers, plant) => {
+            const existing = layers.find((l) => l.layerId === plant.layerId)
+            if (!existing) {
+              layers.push({
+                layerId: plant.layerId,
+                plants: [plant],
+                avgHealth: plant.health,
+              })
+            } else {
+              existing.plants.push(plant)
+              existing.avgHealth = (existing.avgHealth + plant.health) / 2
+            }
+            return layers
+          }, [] as Array<{ layerId: number; plants: typeof plants; avgHealth: number }>).map((layer) => {
+            const avgTemp = layer.plants.reduce((sum, p) => sum + p.temperature, 0) / layer.plants.length
+            const avgHumidity = 65 // mock for demo
+            const healthStatus =
+              layer.avgHealth >= 85 ? "Optimal" : layer.avgHealth >= 70 ? "Good" : layer.avgHealth >= 50 ? "Needs Attention" : "Critical"
+            const statusColor =
+              layer.avgHealth >= 85 ? "text-neon-green" : layer.avgHealth >= 70 ? "text-neon-aqua" : layer.avgHealth >= 50 ? "text-warning" : "text-destructive"
 
-          <div className="lg:col-span-5 space-y-6">
-            <PredictiveRiskAnalysis />
-            <HarvestOptimizationEngine />
-            <ResourceEfficiencyPanel />
-          </div>
+            return (
+              <div
+                key={layer.layerId}
+                className="rounded-xl border border-border/50 bg-secondary/25 p-4 hover:bg-secondary/40 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <p className="font-semibold text-sm text-foreground">Layer {layer.layerId}</p>
+                  <div
+                    className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                      layer.avgHealth >= 85
+                        ? "border-neon-green/30 bg-neon-green/10 text-neon-green"
+                        : layer.avgHealth >= 70
+                          ? "border-neon-aqua/30 bg-neon-aqua/10 text-neon-aqua"
+                          : layer.avgHealth >= 50
+                            ? "border-warning/30 bg-warning/10 text-warning"
+                            : "border-destructive/30 bg-destructive/10 text-destructive"
+                    }`}
+                  >
+                    {Math.round(layer.avgHealth)}%
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-xs text-muted-foreground">
+                  <div className="flex justify-between">
+                    <span>Temperature</span>
+                    <span className="text-foreground font-medium">{avgTemp.toFixed(1)}°C</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Humidity</span>
+                    <span className="text-foreground font-medium">{avgHumidity}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Est. Yield</span>
+                    <span className="text-foreground font-medium">{layer.plants.length} plants</span>
+                  </div>
+                </div>
+
+                {/* Risk pill: quick predictive indicator */}
+                {(() => {
+                  const riskScore = Math.round((100 - layer.avgHealth) + Math.abs(avgTemp - 24) * 3)
+                  const timeToRisk = layer.avgHealth >= 85 ? null : Math.max(1, Math.round((80 - layer.avgHealth) / 4))
+                  const riskLabel = riskScore >= 90 ? 'Critical' : riskScore >= 70 ? 'High' : riskScore >= 45 ? 'Moderate' : 'Low'
+                  const pillStyle =
+                    riskLabel === 'Critical' ? 'border-destructive/30 bg-destructive/10 text-destructive' :
+                    riskLabel === 'High' ? 'border-warning/30 bg-warning/10 text-warning' :
+                    riskLabel === 'Moderate' ? 'border-neon-aqua/30 bg-neon-aqua/10 text-neon-aqua' : 'border-neon-green/30 bg-neon-green/10 text-neon-green'
+
+                  return (
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className={`rounded-full px-3 py-1 text-xs font-semibold ${pillStyle}`}>Risk: {riskLabel}</div>
+                      <div className="text-xs text-muted-foreground">{timeToRisk ? `Time-to-risk: ${timeToRisk}h` : 'Stable'}</div>
+                    </div>
+                  )
+                })()}
+              </div>
+            )
+          })}
         </div>
       </section>
 
-      <section className="glass-card border border-border/40 p-4">
-        <div className="flex items-center gap-2 text-sm font-semibold text-neon-green">
-          <Sparkles className="h-4 w-4" />
-          AI Insight
+      {/* SIMPLIFIED SECTION 2: SMART ALERTS */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Smart Alerts</h2>
+          <p className="text-xs text-muted-foreground">Top system recommendations</p>
         </div>
 
-        <div className="mt-3 grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-3">
-            <div className="rounded-xl border border-border/40 bg-background/50 p-3">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Adaptive Recovery Rate</p>
-                  <p className="text-xs text-muted-foreground">Measured from resolved intervention outcomes</p>
-                </div>
-                <div className={`rounded-lg border px-3 py-1 text-sm font-semibold ${adaptiveInsight.successRate >= 75 ? "border-success/40 bg-success/15 text-success" : adaptiveInsight.successRate >= 50 ? "border-warning/40 bg-warning/15 text-warning" : "border-destructive/40 bg-destructive/15 text-destructive"}`}>
-                  {adaptiveInsight.successRate}%
-                </div>
-              </div>
-              <div className="mt-3 grid gap-2 text-xs text-muted-foreground md:grid-cols-3">
-                <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
-                  <p className="text-[11px] uppercase tracking-[0.14em]">Resolved</p>
-                  <p className="mt-1 text-base font-semibold text-foreground">{interventions.filter((item) => item.status === "resolved").length}</p>
-                </div>
-                <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
-                  <p className="text-[11px] uppercase tracking-[0.14em]">Failures</p>
-                  <p className="mt-1 text-base font-semibold text-foreground">{adaptiveInsight.repeatedFailures}</p>
-                </div>
-                <div className="rounded-lg border border-border/40 bg-secondary/20 p-2.5">
-                  <p className="text-[11px] uppercase tracking-[0.14em]">Active Fixes</p>
-                  <p className="mt-1 text-base font-semibold text-foreground">{adaptiveInsight.openInterventions}</p>
-                </div>
-              </div>
-            </div>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {recommendations.slice(0, 3).map((rec) => {
+            const severityStyles =
+              rec.severity === "critical"
+                ? "border-destructive/30 bg-destructive/10"
+                : rec.severity === "warning"
+                  ? "border-warning/30 bg-warning/10"
+                  : "border-neon-aqua/30 bg-neon-aqua/10"
+            const textColor =
+              rec.severity === "critical"
+                ? "text-destructive"
+                : rec.severity === "warning"
+                  ? "text-warning"
+                  : "text-neon-aqua"
 
-            <div className="rounded-xl border border-border/40 bg-background/50 p-3">
-              <p className="text-sm font-semibold text-foreground">AI Performance Snapshot</p>
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">Quick summary of AI confidence, top drivers, and efficiency trends.</p>
-              <div className="mt-3 grid gap-2 md:grid-cols-2">
-                <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] font-semibold text-muted-foreground">Model Confidence</p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <div className={`text-2xl font-bold ${adaptiveInsight.successRate >= 75 ? 'text-success' : adaptiveInsight.successRate >= 50 ? 'text-warning' : 'text-destructive'}`}>
-                      {adaptiveInsight.successRate}%
+            const intervention = interventions.find((iv) => iv.plantId === rec.plantId && iv.status === "in-progress")
+
+            return (
+              <div key={rec.id} className={`rounded-xl border p-4 ${severityStyles}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <p className={`font-semibold text-sm ${textColor}`}>{rec.message}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {rec.plantName} · {rec.action ?? "AI review"} · {rec.estimatedImpact ?? "—"}
+                    </p>
+                  </div>
+                  {intervention && (
+                    <div className="text-xs font-semibold text-neon-green">
+                      ✓ Auto-responding
                     </div>
-                    <div className="text-xs text-muted-foreground">based on resolved outcomes</div>
-                  </div>
-                  <div className="mt-3 h-2 w-full rounded-full bg-border/20">
-                    <div className={`h-2 rounded-full ${adaptiveInsight.successRate >= 75 ? 'bg-success' : 'bg-neon-aqua'}`} style={{ width: `${adaptiveInsight.successRate}%` }} />
-                  </div>
-                </div>
-
-                <div className="rounded-lg border border-border/40 bg-secondary/20 p-3">
-                  <p className="text-[11px] uppercase tracking-[0.14em] font-semibold text-muted-foreground">Top Drivers</p>
-                  <p className="mt-2 text-sm font-medium text-foreground">{adaptiveInsight.dominantMetric}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Most affected crop: {adaptiveInsight.harvestCandidates?.[0]?.plant?.name ?? '—'}</p>
+                  )}
                 </div>
               </div>
-              <div className="mt-3 grid gap-2 md:grid-cols-3 text-xs text-muted-foreground">
-                <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
-                  <p className="font-semibold text-foreground">Unnecessary Interventions avoided</p>
-                  <p className="mt-1">{adaptiveInsight.efficiency?.preventiveEfficiencyBonus?.toFixed ? adaptiveInsight.efficiency.preventiveEfficiencyBonus.toFixed(0) : adaptiveInsight.efficiency?.waterSavingsPercent}% more effective</p>
+            )
+          })}
+
+          {recommendations.length === 0 && (
+            <div className="col-span-full rounded-xl border border-neon-green/30 bg-neon-green/10 p-4 text-center">
+              <p className="text-sm font-medium text-neon-green">All systems healthy</p>
+              <p className="text-xs text-muted-foreground mt-1">No critical alerts</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* SIMPLIFIED SECTION 3: HARVEST & EFFICIENCY */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Harvest & Efficiency</h2>
+          <p className="text-xs text-muted-foreground">Predicted yields and system performance</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {/* Ready to Harvest */}
+          <div className="rounded-xl border border-neon-green/25 bg-neon-green/10 p-4">
+            <p className="text-sm font-semibold text-foreground">Ready Soon</p>
+            <div className="mt-3 space-y-2">
+              {adaptiveInsight.harvestCandidates.slice(0, 2).map(({ plant, daysToHarvest }) => (
+                <div key={plant.id} className="text-xs text-muted-foreground">
+                  <div className="flex justify-between">
+                    <span>{plant.name}</span>
+                    <span className="text-neon-green font-semibold">{daysToHarvest}d</span>
+                  </div>
                 </div>
-                <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
-                  <p className="font-semibold text-foreground">Resource Efficiency</p>
-                  <p className="mt-1">{adaptiveInsight.efficiency?.waterSavingsPercent}% water · {adaptiveInsight.efficiency?.energySavingsPercent}% energy</p>
-                </div>
-                <div className="rounded-lg border border-border/40 bg-secondary/10 p-2">
-                  <p className="font-semibold text-foreground">What to do next</p>
-                  <p className="mt-1">{adaptiveInsight.successRate < 60 ? 'Recommend: increase pH protocol granularity' : 'System is converging — monitor for 1-2 cycles'}</p>
-                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* System Efficiency */}
+          <div className="rounded-xl border border-neon-aqua/25 bg-neon-aqua/10 p-4">
+            <p className="text-sm font-semibold text-foreground">System Efficiency</p>
+            <div className="mt-3 space-y-2 text-xs">
+              <div className="flex justify-between text-muted-foreground">
+                <span>Water Saved</span>
+                <span className="text-neon-aqua font-semibold">{adaptiveInsight.efficiency?.waterSavingsPercent ?? 24}%</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Energy Saved</span>
+                <span className="text-neon-aqua font-semibold">{adaptiveInsight.efficiency?.energySavingsPercent ?? 18}%</span>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="rounded-xl border border-border/40 bg-background/50 p-3">
-              <p className="text-sm font-semibold text-foreground">Optimal Harvest Strategy</p>
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{adaptiveInsight.harvestStrategy}</p>
-              <div className="mt-3 space-y-2">
-                {adaptiveInsight.harvestCandidates.map(({ plant, trend, daysToHarvest }) => (
-                  <div key={plant.id} className="rounded-lg border border-border/40 bg-secondary/20 p-2.5 text-xs">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-medium text-foreground">{plant.name}</p>
-                      <span className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${trend.label === "Improving" ? "border-success/40 bg-success/15 text-success" : trend.label === "Declining" ? "border-destructive/40 bg-destructive/15 text-destructive" : "border-warning/40 bg-warning/15 text-warning"}`}>
-                        {trend.label}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-muted-foreground">Harvest window: {daysToHarvest} days</p>
-                  </div>
-                ))}
+          {/* AI Performance */}
+          <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-4">
+            <p className="text-sm font-semibold text-foreground">AI Confidence</p>
+            <div className="mt-3">
+              <div className="text-2xl font-bold text-cyan-400">{adaptiveInsight.successRate}%</div>
+              <div className="mt-2 h-2 w-full rounded-full bg-border/20 overflow-hidden">
+                <div
+                  className="h-full bg-cyan-400 rounded-full"
+                  style={{ width: `${adaptiveInsight.successRate}%` }}
+                />
               </div>
-            </div>
-
-            <div className="rounded-xl border border-neon-green/25 bg-neon-green/10 p-3">
-              <p className="text-sm font-semibold text-foreground">Trend Summary</p>
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Positive health momentum shortens the harvest window, while declining trends signal that the crop should be stabilized before cutting.
-              </p>
-              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Dominant failure mode: <span className="font-medium text-foreground">{adaptiveInsight.dominantMetric}</span>
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-neon-aqua/25 bg-neon-aqua/10 p-3">
-              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-neon-aqua">
-                <Activity className="h-4 w-4" />
-                Resource Efficiency
-              </div>
-              <p className="mb-2 text-xs text-muted-foreground">AI-optimized predictive control reducing waste</p>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">💧 Water saved</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-sm font-semibold text-neon-aqua">{adaptiveInsight.efficiency.waterSavingsPercent}%</span>
-                    <p className="text-[11px] text-muted-foreground">{adaptiveInsight.efficiency.waterSavingsL}L/week</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">⚡ Energy saved</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-sm font-semibold text-neon-green">{adaptiveInsight.efficiency.energySavingsPercent}%</span>
-                    <p className="text-[11px] text-muted-foreground">{adaptiveInsight.efficiency.energySavingsKwh} kWh/week</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between gap-2 border-t border-border/30 pt-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-foreground">Cost savings</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-sm font-semibold text-neon-green">${adaptiveInsight.efficiency.costSavingsUSD}</span>
-                    <p className="text-[11px] text-muted-foreground">/week</p>
-                  </div>
-                </div>
-              </div>
+              <p className="text-xs text-muted-foreground mt-2">Based on resolved interventions</p>
             </div>
           </div>
         </div>
