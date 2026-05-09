@@ -2,15 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  BarChart3,
-  Droplets,
-  Leaf,
-  Lightbulb,
-  LineChart,
-  Settings,
-  Zap,
-} from 'lucide-react'
+import { BarChart3, Droplets, Leaf, LineChart, Settings, Shield, Cpu } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function Sidebar() {
@@ -18,32 +10,27 @@ export function Sidebar() {
 
   const menuItems = [
     {
-      label: 'Overview',
+      label: 'Command Center',
       href: '/overview',
       icon: BarChart3,
     },
     {
-      label: 'Plant AI',
+      label: 'Plant Intelligence',
       href: '/plant-ai',
       icon: Leaf,
     },
     {
-      label: 'Water System',
+      label: 'Water & Nutrient System',
       href: '/water-system',
       icon: Droplets,
     },
     {
-      label: 'Environment',
-      href: '/environment',
-      icon: Zap,
+      label: 'Automation Engine',
+      href: '/automation-engine',
+      icon: Cpu,
     },
     {
-      label: 'Insights',
-      href: '/insights',
-      icon: Lightbulb,
-    },
-    {
-      label: 'Analytics',
+      label: 'Analytics & Sustainability',
       href: '/analytics',
       icon: LineChart,
     },
@@ -55,18 +42,18 @@ export function Sidebar() {
   ]
 
   return (
-    <aside className="w-64 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 border-r border-neon-aqua/20 flex flex-col h-screen sticky top-0">
+    <aside className="w-64 bg-gradient-to-b from-white via-slate-50 to-slate-100 border-r border-border/60 flex flex-col h-screen sticky top-0">
       {/* Logo Section */}
-      <div className="p-6 border-b border-neon-aqua/20">
+      <div className="p-6 border-b border-border/60">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-neon-aqua to-neon-green rounded-lg flex items-center justify-center">
-            <Droplets className="w-5 h-5 text-slate-950" />
+          <div className="w-8 h-8 bg-gradient-to-br from-neon-aqua/70 to-neon-green/70 rounded-lg flex items-center justify-center">
+            <Droplets className="w-5 h-5 text-slate-900" />
           </div>
           <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-neon-aqua to-neon-green bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-foreground">
               AquaVita
             </h1>
-            <p className="text-xs text-slate-400">Smart Farming</p>
+            <p className="text-xs text-muted-foreground">Smart Farming</p>
           </div>
         </div>
       </div>
@@ -84,8 +71,8 @@ export function Sidebar() {
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300',
                 isActive
-                  ? 'bg-gradient-to-r from-neon-aqua/20 to-neon-green/20 text-neon-aqua border border-neon-aqua/50 shadow-[0_0_20px_rgba(0,_229,_200,_0.3)]'
-                  : 'text-slate-300 hover:bg-slate-800/50 hover:text-neon-aqua border border-transparent'
+                  ? 'bg-gradient-to-r from-neon-aqua/20 to-neon-green/20 text-neon-blue border border-neon-aqua/40 shadow-[0_0_20px_rgba(0,_229,_200,_0.25)]'
+                  : 'text-foreground/80 hover:bg-slate-200/70 hover:text-neon-blue border border-transparent'
               )}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />
@@ -96,10 +83,10 @@ export function Sidebar() {
       </nav>
 
       {/* Footer Section */}
-      <div className="p-4 border-t border-neon-aqua/20 bg-slate-950/50">
-        <div className="text-xs text-slate-400 text-center">
+      <div className="p-4 border-t border-border/60 bg-white/60">
+        <div className="text-xs text-muted-foreground text-center">
           <p>v1.0.0</p>
-          <p className="text-slate-500">Powered by AquaVita</p>
+          <p className="text-muted-foreground/70">Powered by AquaVita</p>
         </div>
       </div>
     </aside>

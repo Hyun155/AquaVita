@@ -1,237 +1,347 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Leaf, Droplets, Zap, ThermometerSun, Fish } from "lucide-react"
-import { farmLayers } from "@/lib/mockData"
+import { useMemo, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
+import { AlertTriangle, Bot, Cpu, Leaf, ShieldAlert, Sparkles, ThermometerSun, Zap } from "lucide-react"
+import VerticalFarmView from "@/components/environment/VerticalFarmView"
+import { aiActionTimeline, automationEvents, criticalAlerts, farmLayers, operationalModes } from "@/lib/mockData"
 
 export function DigitalTwin() {
   const [selectedLayer, setSelectedLayer] = useState<number | null>(null)
-  const [flowAnimation, setFlowAnimation] = useState(0)
+  const [hoveredLayerId, setHoveredLayerId] = useState<number | null>(null)
+  const [activeMode, setActiveMode] = useState("balanced")
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFlowAnimation((prev) => (prev + 1) % 100)
-    }, 50)
-    return () => clearInterval(interval)
-  }, [])
-
-  const getHealthColor = (health: number) => {
-    if (health >= 85) return "text-success bg-success/20 border-success/30"
-    if (health >= 70) return "text-warning bg-warning/20 border-warning/30"
-    return "text-destructive bg-destructive/20 border-destructive/30"
+  const layerData = {
+    1: {
+      name: "Layer 1",
+      crop: "Lettuce A",
+      health: 91,
+      temperature: "23.1°C",
+      humidity: "65%",
+      ph: "6.2",
+      ec: "1.8",
+      growthRate: "+6%",
+      diseaseRisk: "12%",
+      yieldPrediction: "88%",
+      automation: "Auto",
+      narrative: [
+        "Layer 1 is performing optimally.",
+        "Nutrient levels are well balanced.",
+        "Harvest predicted in 8 days.",
+      ],
+    },
+    2: {
+      name: "Layer 2",
+      crop: "Basil B",
+      health: 84,
+      temperature: "24.5°C",
+      humidity: "71%",
+      ph: "6.5",
+      ec: "2.0",
+      growthRate: "+3%",
+      diseaseRisk: "19%",
+      yieldPrediction: "81%",
+      automation: "Assisted",
+      narrative: [
+        "Slight humidity elevation detected.",
+        "Airflow adjusted to compensate.",
+        "Monitor disease risk closely.",
+      ],
+    },
+    3: {
+      name: "Layer 3",
+      crop: "Spinach C",
+      health: 72,
+      temperature: "25.9°C",
+      humidity: "78%",
+      ph: "6.9",
+      ec: "2.3",
+      growthRate: "+4%",
+      diseaseRisk: "28%",
+      yieldPrediction: "76%",
+      automation: "Assisted",
+      narrative: [
+        "Humidity levels may increase fungal risk.",
+        "UV sterilization activated automatically.",
+        "AI optimized nutrient circulation.",
+      ],
+    },
+    4: {
+      name: "Layer 4",
+      crop: "Kale D",
+      health: 88,
+      temperature: "22.8°C",
+      humidity: "63%",
+      ph: "6.1",
+      ec: "1.9",
+      growthRate: "+5%",
+      diseaseRisk: "9%",
+      yieldPrediction: "85%",
+      automation: "Auto",
+      narrative: [
+        "Layer 4 conditions are stable.",
+        "Low disease risk detected.",
+        "Growth rate above average.",
+      ],
+    },
   }
 
-  const getHealthGlow = (health: number) => {
-    if (health >= 85) return "shadow-[0_0_10px_rgba(34,197,94,0.5)]"
-    if (health >= 70) return "shadow-[0_0_10px_rgba(234,179,8,0.5)]"
-    return "shadow-[0_0_10px_rgba(239,68,68,0.5)]"
-  }
+  const activeLayer = useMemo(() => {
+    const targetId = hoveredLayerId ?? selectedLayer
+    if (targetId == null) return null
+    return farmLayers.find((layer) => layer.id === targetId) ?? null
+  }, [hoveredLayerId, selectedLayer])
+
+  const layer = layerData[selectedLayer as keyof typeof layerData]
+
+  const narrativeLines = useMemo(() => {
+    return layer?.narrative ?? []
+  }, [layer])
 
   return (
-    <div className="glass-card rounded-2xl p-6 h-full">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Farm Digital Twin</h2>
-          <p className="text-sm text-muted-foreground">Real-time System Visualization</p>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-neon-green/20 border border-neon-green/30">
-          <div className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
-          <span className="text-xs font-medium text-neon-green">Live</span>
-        </div>
-      </div>
+    <div className="relative">
+      <div className="relative h-[78vh] min-h-[760px] overflow-hidden rounded-[32px] border border-border/40 bg-gradient-to-br from-[#f5f7fb] via-[#eef4ff] to-[#e6eef9] shadow-[0_40px_80px_rgba(60,80,120,0.2)]">
+        <div className="pointer-events-none absolute inset-0 twin-atmosphere" />
+        <div className="pointer-events-none absolute inset-0 twin-grid" />
+        <div className="pointer-events-none absolute inset-0 twin-sheen" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 relative">
-          <div className="space-y-2">
-            {farmLayers.map((layer) => (
-              <div
-                key={layer.id}
-                onClick={() => setSelectedLayer(selectedLayer === layer.id ? null : layer.id)}
-                className={`relative p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
-                  selectedLayer === layer.id
-                    ? "bg-neon-green/10 border-neon-green/50 " + getHealthGlow(layer.health)
-                    : "bg-secondary/30 border-border/50 hover:bg-secondary/50"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${getHealthColor(layer.health)} border`}>
-                      <Leaf className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{layer.name}</p>
-                      <p className="text-xs text-muted-foreground">{layer.plants}</p>
-                    </div>
-                  </div>
+        <div className="relative h-full">
+          <VerticalFarmView
+            layers={farmLayers}
+            hoveredLayerId={hoveredLayerId}
+            selectedLayerId={selectedLayer}
+            onHoverLayer={setHoveredLayerId}
+            onSelectLayer={setSelectedLayer}
+            onLayerClick={setSelectedLayer}
+          />
 
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1.5">
-                      <Zap className="w-3.5 h-3.5 text-warning" />
-                      <span className="text-xs text-muted-foreground">{layer.light}%</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Droplets className="w-3.5 h-3.5 text-neon-aqua" />
-                      <span className="text-xs text-muted-foreground">{layer.moisture}%</span>
-                    </div>
-                    <div className={`px-2 py-1 rounded-full text-xs font-medium ${getHealthColor(layer.health)} border`}>
-                      {layer.health}%
-                    </div>
-                  </div>
+          <div className="absolute left-6 top-6 w-[280px] space-y-3">
+            <div className="holo-panel">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-neon-blue">
+                  <AlertTriangle className="h-4 w-4" />
+                  Critical alerts
                 </div>
-
-                {selectedLayer === layer.id && (
-                  <div className="mt-4 pt-4 border-t border-border/30 grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground mb-1">Light Intensity</p>
-                      <div className="h-2 rounded-full bg-secondary/50 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-warning to-warning/60 rounded-full"
-                          style={{ width: `${layer.light}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground mb-1">Moisture Level</p>
-                      <div className="h-2 rounded-full bg-secondary/50 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-neon-aqua to-neon-aqua/60 rounded-full"
-                          style={{ width: `${layer.moisture}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs text-muted-foreground mb-1">Health Score</p>
-                      <div className="h-2 rounded-full bg-secondary/50 overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-success to-success/60 rounded-full"
-                          style={{ width: `${layer.health}%` }}
-                        />
-                      </div>
-                    </div>
+                <span className="text-[10px] text-neon-blue/70">Live</span>
+              </div>
+              <div className="mt-3 space-y-2">
+                {criticalAlerts.map((alert) => (
+                  <div key={alert.id} className="rounded-xl border border-neon-blue/20 bg-white/70 px-3 py-2">
+                    <p className="text-xs font-semibold text-foreground">{alert.title}</p>
+                    <p className="text-[11px] text-muted-foreground">{alert.message}</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-neon-blue/70">{alert.timestamp}</p>
                   </div>
-                )}
+                ))}
               </div>
-            ))}
+            </div>
+
+            <div className="holo-panel">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-neon-green">
+                <Sparkles className="h-4 w-4" />
+                AI actions
+              </div>
+              <div className="mt-3 space-y-3">
+                {aiActionTimeline.map((item) => (
+                  <div key={item.id} className="rounded-xl border border-neon-green/20 bg-white/70 px-3 py-2">
+                    <p className="text-[11px] text-muted-foreground">{item.time}</p>
+                    <p className="text-xs text-foreground">{item.message}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="mt-4 p-3 rounded-xl bg-neon-blue/10 border border-neon-blue/30 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-neon-blue/20 flex items-center justify-center animate-pulse-glow text-neon-blue">
-                <Zap className="w-4 h-4" />
+          <div
+            className="absolute right-6 top-6 w-[260px] space-y-3"
+            style={{ display: selectedLayer ? "none" : "block" }}
+          >
+            <div className="holo-panel">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-neon-blue">
+                <Cpu className="h-4 w-4" />
+                System health
               </div>
-              <div>
-                <p className="text-sm font-medium text-neon-blue">UV Sterilization Active</p>
-                <p className="text-xs text-muted-foreground">Cycle 3 of 5 • 85% Complete</p>
+              <div className="mt-3 space-y-2 text-xs">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Energy load</span>
+                  <span className="text-neon-green">Stable</span>
+                </div>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Sensor mesh</span>
+                  <span className="text-neon-aqua">Synced</span>
+                </div>
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span>Water loop</span>
+                  <span className="text-warning">Adaptive</span>
+                </div>
               </div>
             </div>
-            <div className="w-24 h-2 rounded-full bg-secondary/50 overflow-hidden">
-              <div className="h-full w-[85%] bg-gradient-to-r from-neon-blue to-neon-aqua rounded-full animate-pulse" />
+
+            <div className="holo-panel">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-neon-green">
+                <Bot className="h-4 w-4" />
+                Automation events
+              </div>
+              <div className="mt-3 space-y-2">
+                {automationEvents.map((event) => (
+                  <div key={event.id} className="rounded-xl border border-border/40 bg-white/70 px-3 py-2">
+                    <p className="text-xs text-foreground">{event.system}</p>
+                    <p className="text-[11px] text-muted-foreground">{event.detail}</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-neon-aqua/70">{event.status}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="holo-panel">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-neon-aqua">
+                <ShieldAlert className="h-4 w-4" />
+                Operating mode
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {operationalModes.map((mode) => (
+                  <button
+                    key={mode.id}
+                    onClick={() => setActiveMode(mode.id)}
+                    className={`hud-pill ${activeMode === mode.id ? "hud-pill-active" : ""}`}
+                  >
+                    <span className="text-xs font-semibold">{mode.label}</span>
+                    <span className="text-[11px] text-foreground/80 leading-snug">{mode.description}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="space-y-4">
-          <div className="glass-card rounded-xl p-4 bg-gradient-to-br from-neon-aqua/10 to-neon-blue/5 border border-neon-aqua/30">
-            <div className="flex items-center gap-2 mb-4">
-              <Fish className="w-5 h-5 text-neon-aqua" />
-              <h3 className="font-medium text-neon-aqua">Aquaponics System</h3>
-            </div>
+          <AnimatePresence>
+            {activeLayer && hoveredLayerId && !selectedLayer && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="absolute bottom-6 left-1/2 w-[320px] -translate-x-1/2 rounded-2xl border border-neon-blue/30 bg-white/80 px-4 py-3 text-xs text-neon-blue shadow-[0_0_30px_rgba(59,130,246,0.15)]"
+              >
+                <div className="flex items-center gap-2">
+                  <ThermometerSun className="h-4 w-4" />
+                  <span className="uppercase tracking-[0.2em]">Environmental overlay</span>
+                </div>
+                <p className="mt-2 text-muted-foreground">
+                  {activeLayer.name} temperature {activeLayer.temperature.toFixed(1)}°C • humidity {activeLayer.humidity}% • pH {activeLayer.ph}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-            <div className="relative h-32 rounded-xl bg-gradient-to-b from-neon-blue/20 to-neon-aqua/30 border border-neon-aqua/20 overflow-hidden mb-4">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <svg className="w-full h-full" viewBox="0 0 200 100">
-                  <path
-                    d="M 10 50 Q 50 30 100 50 T 190 50"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="text-neon-aqua/50"
-                    strokeDasharray="10 5"
-                    style={{ strokeDashoffset: -flowAnimation }}
-                  />
-                  <path
-                    d="M 10 60 Q 50 80 100 60 T 190 60"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="text-neon-aqua/30"
-                    strokeDasharray="10 5"
-                    style={{ strokeDashoffset: flowAnimation }}
-                  />
-                </svg>
-              </div>
-
-              {[...Array(4)].map((_, i) => (
+          <AnimatePresence>
+            {selectedLayer ? (
+              <motion.aside
+                key={selectedLayer}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 30 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="absolute right-6 top-6 w-[260px]"
+                style={{
+                  position: "absolute",
+                  zIndex: 20,
+                  maxHeight: "calc(100% - 48px)",
+                  overflowY: "auto",
+                  paddingBottom: "16px",
+                }}
+              >
                 <div
-                  key={i}
-                  className="absolute animate-float"
                   style={{
-                    left: `${20 + i * 20}%`,
-                    top: `${30 + (i % 2) * 30}%`,
-                    animationDelay: `${i * 0.5}s`,
+                    background: "rgba(255, 255, 255, 0.75)",
+                    backdropFilter: "blur(12px)",
+                    border: "1px solid rgba(100, 150, 255, 0.15)",
+                    borderRadius: "16px",
+                    padding: "20px",
+                    marginBottom: "16px",
+                    boxShadow: "0 4px 24px rgba(60, 80, 120, 0.12)",
                   }}
                 >
-                  <Fish className="w-4 h-4 text-neon-aqua" style={{ transform: i % 2 === 0 ? "scaleX(-1)" : "scaleX(1)" }} />
+                  <button
+                    onClick={() => setSelectedLayer(null)}
+                    className="mb-3 text-[10px] uppercase tracking-widest text-white/40 hover:text-white/80"
+                  >
+                    ← Back
+                  </button>
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.24em] text-neon-blue">AI intelligence</p>
+                    <h3 className="mt-2 text-lg font-semibold text-foreground">{layer.name}</h3>
+                    <p className="text-xs text-muted-foreground">{layer.crop}</p>
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    <TelemetryRow label="Plant health" value={`${layer.health}%`} accent="text-success" />
+                    <TelemetryRow label="Temperature" value={layer.temperature} accent="text-warning" />
+                    <TelemetryRow label="Humidity" value={layer.humidity} accent="text-neon-aqua" />
+                    <TelemetryRow label="pH" value={layer.ph} accent="text-neon-blue" />
+                    <TelemetryRow label="EC level" value={layer.ec} accent="text-neon-aqua" />
+                    <TelemetryRow label="Growth rate" value={layer.growthRate} accent="text-neon-green" />
+                    <TelemetryRow label="Disease risk" value={layer.diseaseRisk} accent="text-warning" />
+                    <TelemetryRow label="Yield prediction" value={layer.yieldPrediction} accent="text-success" />
+                    <TelemetryRow label="Automation" value={layer.automation} accent="text-foreground" />
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Ammonia → Nitrate</span>
-                <span className="text-neon-green font-medium">Converting</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-2 rounded-full bg-secondary/50 overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-warning via-neon-aqua to-neon-green rounded-full"
-                    style={{ width: "78%" }}
-                  />
+                <div
+                  style={{
+                    background: "rgba(255, 255, 255, 0.75)",
+                    backdropFilter: "blur(12px)",
+                    border: "1px solid rgba(100, 150, 255, 0.15)",
+                    borderRadius: "16px",
+                    padding: "20px",
+                    marginBottom: "16px",
+                    boxShadow: "0 4px 24px rgba(60, 80, 120, 0.12)",
+                  }}
+                >
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neon-aqua">
+                    <Zap className="h-4 w-4" />
+                    AI narrative
+                  </div>
+                  <ul className="mt-2 space-y-2 text-xs text-muted-foreground">
+                    {narrativeLines.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
                 </div>
-                <span className="text-xs text-muted-foreground">78%</span>
-              </div>
-            </div>
-          </div>
 
-          <div className="glass-card rounded-xl p-4 border border-border/50">
-            <div className="flex items-center gap-2 mb-3">
-              <Droplets className="w-4 h-4 text-neon-aqua" />
-              <h4 className="text-sm font-medium">Water Circulation</h4>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Flow Rate</span>
-                <span className="text-xs font-medium text-neon-aqua">2.4 L/min</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Temperature</span>
-                <span className="text-xs font-medium text-success">24°C</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Dissolved O₂</span>
-                <span className="text-xs font-medium text-neon-green">8.2 mg/L</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card rounded-xl p-4 border border-border/50">
-            <div className="flex items-center gap-2 mb-3">
-              <ThermometerSun className="w-4 h-4 text-warning" />
-              <h4 className="text-sm font-medium">Environment</h4>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="text-center p-2 rounded-lg bg-secondary/30">
-                <p className="text-lg font-bold text-warning">26°C</p>
-                <p className="text-xs text-muted-foreground">Air Temp</p>
-              </div>
-              <div className="text-center p-2 rounded-lg bg-secondary/30">
-                <p className="text-lg font-bold text-neon-aqua">68%</p>
-                <p className="text-xs text-muted-foreground">Humidity</p>
-              </div>
-            </div>
-          </div>
+                <div
+                  style={{
+                    background: "rgba(255, 255, 255, 0.75)",
+                    backdropFilter: "blur(12px)",
+                    border: "1px solid rgba(100, 150, 255, 0.15)",
+                    borderRadius: "16px",
+                    padding: "20px",
+                    marginBottom: "16px",
+                    boxShadow: "0 4px 24px rgba(60, 80, 120, 0.12)",
+                  }}
+                >
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-neon-green">
+                    <Leaf className="h-4 w-4" />
+                    Automation controls
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                    <button className="rounded-xl border border-neon-green/30 bg-neon-green/10 px-3 py-2 text-neon-green">Nutrients</button>
+                    <button className="rounded-xl border border-neon-aqua/30 bg-neon-aqua/10 px-3 py-2 text-neon-aqua">Mist cycle</button>
+                    <button className="rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 text-warning">Cooling boost</button>
+                    <button className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-white/70">Manual mode</button>
+                  </div>
+                </div>
+              </motion.aside>
+            ) : null}
+          </AnimatePresence>
         </div>
       </div>
+    </div>
+  )
+}
+
+function TelemetryRow({ label, value, accent }: { label: string; value: string; accent: string }) {
+  return (
+    <div className="flex items-center justify-between rounded-xl border border-border/40 bg-white/70 px-3 py-2">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className={`text-xs font-semibold ${accent}`}>{value}</span>
     </div>
   )
 }

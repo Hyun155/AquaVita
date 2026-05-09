@@ -1,11 +1,165 @@
 import { AlertCircle, AlertTriangle, CheckCircle2, Calendar, Leaf, TrendingDown, Sparkles, Wrench, Eye, X, Droplets, Recycle, Zap } from "lucide-react"
 
 export const farmLayers = [
-  { id: 1, name: "Layer 5", plants: "Lettuce A", health: 95, light: 85, moisture: 72 },
-  { id: 2, name: "Layer 4", plants: "Basil B", health: 88, light: 90, moisture: 68 },
-  { id: 3, name: "Layer 3", plants: "Spinach C", health: 72, light: 78, moisture: 80 },
-  { id: 4, name: "Layer 2", plants: "Kale D", health: 91, light: 88, moisture: 75 },
-  { id: 5, name: "Layer 1", plants: "Herbs E", health: 85, light: 82, moisture: 70 },
+  {
+    id: 1,
+    name: "Layer 5",
+    plants: "Lettuce A",
+    health: 95,
+    light: 88,
+    moisture: 72,
+    temperature: 24.1,
+    humidity: 66,
+    ph: 6.4,
+    ec: 1.9,
+    growthRate: 8,
+    diseaseRisk: 6,
+    yieldPrediction: 92,
+    automationStatus: "Auto",
+    rackStatus: "optimal",
+  },
+  {
+    id: 2,
+    name: "Layer 4",
+    plants: "Basil B",
+    health: 88,
+    light: 90,
+    moisture: 68,
+    temperature: 24.8,
+    humidity: 70,
+    ph: 6.6,
+    ec: 2.1,
+    growthRate: 6,
+    diseaseRisk: 12,
+    yieldPrediction: 89,
+    automationStatus: "Adaptive",
+    rackStatus: "balanced",
+  },
+  {
+    id: 3,
+    name: "Layer 3",
+    plants: "Spinach C",
+    health: 72,
+    light: 78,
+    moisture: 80,
+    temperature: 25.9,
+    humidity: 78,
+    ph: 6.9,
+    ec: 2.3,
+    growthRate: 4,
+    diseaseRisk: 28,
+    yieldPrediction: 76,
+    automationStatus: "Assisted",
+    rackStatus: "watch",
+  },
+  {
+    id: 4,
+    name: "Layer 2",
+    plants: "Kale D",
+    health: 91,
+    light: 86,
+    moisture: 75,
+    temperature: 24.3,
+    humidity: 69,
+    ph: 6.5,
+    ec: 2.0,
+    growthRate: 7,
+    diseaseRisk: 9,
+    yieldPrediction: 90,
+    automationStatus: "Auto",
+    rackStatus: "optimal",
+  },
+  {
+    id: 5,
+    name: "Layer 1",
+    plants: "Herbs E",
+    health: 85,
+    light: 82,
+    moisture: 70,
+    temperature: 23.7,
+    humidity: 64,
+    ph: 6.3,
+    ec: 1.8,
+    growthRate: 5,
+    diseaseRisk: 14,
+    yieldPrediction: 86,
+    automationStatus: "Manual",
+    rackStatus: "balanced",
+  },
+]
+
+export const criticalAlerts = [
+  {
+    id: 1,
+    level: "critical",
+    title: "Humidity surge predicted",
+    message: "Layer 3 is projected to cross fungal risk threshold within 2 hours.",
+    timestamp: "2 min ago",
+  },
+  {
+    id: 2,
+    level: "warning",
+    title: "UV sterilization queued",
+    message: "AI triggered a UV cycle after algae probability spiked in the hydro loop.",
+    timestamp: "11 min ago",
+  },
+]
+
+export const aiActionTimeline = [
+  {
+    id: 1,
+    time: "Just now",
+    message: "AI optimized nutrient circulation to improve lettuce growth efficiency by 4%.",
+  },
+  {
+    id: 2,
+    time: "8 min ago",
+    message: "Airflow rerouted to stabilize Layer 4 microclimate after heat spike detection.",
+  },
+  {
+    id: 3,
+    time: "22 min ago",
+    message: "Irrigation cadence recalibrated to reduce moisture variance across racks.",
+  },
+]
+
+export const automationEvents = [
+  {
+    id: 1,
+    system: "Robotic arm",
+    status: "Active",
+    detail: "Tray alignment correction in Layer 2",
+  },
+  {
+    id: 2,
+    system: "Water loop",
+    status: "Stabilizing",
+    detail: "Flow harmonics normalized after filter swap",
+  },
+  {
+    id: 3,
+    system: "LED array",
+    status: "Adaptive",
+    detail: "Photon density shifted to match growth targets",
+  },
+]
+
+export const operationalModes = [
+  {
+    id: "eco",
+    label: "Eco",
+    description: "Low-energy cultivation",
+  },
+  {
+    id: "balanced",
+    label: "Balanced",
+    description: "Stable output & efficiency",
+  },
+  {
+    id: "yield",
+    label: "Max Yield",
+    description: "Aggressive production mode",
+  },
 ]
 
 export const aiInsights = [
