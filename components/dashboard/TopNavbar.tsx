@@ -15,7 +15,7 @@ export function TopNavbar() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-green to-neon-aqua flex items-center justify-center neon-green-glow">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-green to-neon-aqua flex items-center justify-center">
               <Leaf className="w-6 h-6 text-background" />
             </div>
             <div>
@@ -37,7 +37,7 @@ export function TopNavbar() {
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
                 activeView === "hydro"
-                  ? "bg-gradient-to-r from-neon-green/30 to-neon-aqua/20 text-neon-green neon-green-glow"
+                  ? "bg-gradient-to-r from-neon-green/20 to-neon-aqua/20 text-neon-green"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -49,7 +49,7 @@ export function TopNavbar() {
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all",
                 activeView === "aqua"
-                  ? "bg-gradient-to-r from-neon-aqua/30 to-neon-blue/20 text-neon-aqua neon-aqua-glow"
+                  ? "bg-gradient-to-r from-neon-aqua/20 to-neon-blue/20 text-neon-aqua"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >

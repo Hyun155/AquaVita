@@ -12,17 +12,17 @@ export const MetricCard = ({ title, value, unit, icon: Icon, min, max, color }: 
 
   return (
     <div className={`p-6 rounded-2xl border transition-all duration-500 ${
-      isAlert ? 'bg-red-500/10 border-red-500 animate-pulse shadow-lg shadow-red-500/20' : 'bg-slate-900/50 border-slate-800'
+      isAlert ? 'bg-red-500/10 border-red-500 animate-pulse shadow-lg shadow-red-500/20' : 'bg-white/70 border-border/50'
     }`}>
       <div className="flex items-center gap-2 mb-4">
         <Icon size={18} className={isAlert ? 'text-red-500' : color} />
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{title}</span>
+        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{title}</span>
       </div>
       <div className="flex items-baseline gap-1">
-        <span className={`text-4xl font-bold ${isAlert ? 'text-red-500' : 'text-white'}`}>{value}</span>
-        <span className="text-slate-500 text-xs font-medium">{unit}</span>
+        <span className={`text-4xl font-bold ${isAlert ? 'text-red-500' : 'text-foreground'}`}>{value}</span>
+        <span className="text-muted-foreground text-xs font-medium">{unit}</span>
       </div>
-      <div className="mt-3 text-[10px] text-slate-600 font-mono flex justify-between">
+      <div className="mt-3 text-[10px] text-muted-foreground font-mono flex justify-between">
         <span>TARGET RANGE:</span>
         <span>{min} - {max} {unit}</span>
       </div>

@@ -78,17 +78,17 @@ export default function WaterDashboard() {
   return (
     <div className="space-y-8 font-sans">
       {/* AI Mode Header */}
-      <div className="flex items-center justify-between bg-slate-900 border border-slate-800 text-white p-6 rounded-3xl shadow-2xl">
+      <div className="flex items-center justify-between bg-white/70 border border-border/50 text-foreground p-6 rounded-3xl shadow-xl">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            AI <span className="text-indigo-400 font-mono italic">Manager</span>
+            AI <span className="text-neon-blue font-mono italic">Manager</span>
           </h1>
-          <p className="text-slate-500 text-xs tracking-widest font-bold uppercase">Member 3 • AgriNexus HydroAI+</p>
+          <p className="text-muted-foreground text-xs tracking-widest font-bold uppercase">HydroAI+ Control Loop</p>
         </div>
         <button 
           onClick={handleModeSwitch}
           className={`flex items-center gap-2 px-6 py-2.5 rounded-full font-bold transition-all transform active:scale-95 ${
-            isAutoMode ? 'bg-indigo-600 shadow-lg shadow-indigo-500/20' : 'bg-amber-500 shadow-lg shadow-amber-500/20'
+            isAutoMode ? 'bg-neon-aqua/30 text-neon-aqua shadow-lg shadow-neon-aqua/20' : 'bg-warning/30 text-warning shadow-lg shadow-warning/20'
           }`}
         >
           {isAutoMode ? <Brain size={18} /> : <User size={18} />}
@@ -97,9 +97,9 @@ export default function WaterDashboard() {
       </div>
 
       {/* AI Activity Log */}
-      <div className="bg-slate-900/80 border border-indigo-500/30 p-4 rounded-xl flex items-center gap-3">
-        <Activity size={16} className="text-indigo-400 animate-pulse" />
-        <span className="text-xs font-mono text-indigo-300">LOG: {automationLog}</span>
+      <div className="bg-white/80 border border-neon-blue/30 p-4 rounded-xl flex items-center gap-3">
+        <Activity size={16} className="text-neon-blue animate-pulse" />
+        <span className="text-xs font-mono text-neon-blue">LOG: {automationLog}</span>
       </div>
 
       {/* Monitoring Grid */}
