@@ -288,22 +288,6 @@ export const sustainabilityMetrics = [
     color: "neon-aqua",
   },
   {
-    icon: Recycle,
-    label: "Waste-to-Fertilizer",
-    value: 87,
-    unit: "%",
-    trend: "+5%",
-    color: "neon-green",
-  },
-  {
-    icon: Leaf,
-    label: "Carbon Reduction",
-    value: 72,
-    unit: "kg",
-    trend: "+12%",
-    color: "success",
-  },
-  {
     icon: Zap,
     label: "Energy Efficiency",
     value: 89,
@@ -325,5 +309,4 @@ export const yieldForecastData = [
 export const badges = [
   { name: "Water Champion", tier: "gold", icon: Droplets },
   { name: "Zero Waste", tier: "silver", icon: Recycle },
-  { name: "Carbon Neutral", tier: "bronze", icon: Leaf },
 ]

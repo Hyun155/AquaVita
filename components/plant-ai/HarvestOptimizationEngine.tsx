@@ -37,7 +37,7 @@ export function HarvestOptimizationEngine() {
           const urgencyStyle = urgencyConfig[urgency]
 
           return (
-            <div key={prediction.plantId} className="relative overflow-hidden rounded-xl border border-border/40 bg-gradient-to-r from-background/40 via-secondary/10 to-background/20 p-4 transition-all hover:shadow-md">
+            <div key={prediction.plantId} className="relative overflow-hidden rounded-xl border border-border/40 bg-white p-4 transition-all hover:shadow-md">
               {/* Left indicator stripe */}
               <div
                 className={`absolute left-0 top-0 h-full w-1 ${
@@ -96,7 +96,7 @@ export function HarvestOptimizationEngine() {
                 </div>
 
                 {/* Yield Prediction */}
-                <div className="rounded-lg bg-secondary/30 border border-border/40 p-3 mb-3">
+                <div className="rounded-lg bg-white border border-border/40 p-3 mb-3">
                   <div className="flex items-center justify-between gap-2">
                     <div>
                       <p className="text-xs font-semibold text-foreground mb-1">Expected Yield</p>
@@ -132,19 +132,19 @@ export function HarvestOptimizationEngine() {
       <div className="mt-6 pt-4 border-t border-border/30">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Harvest Window Summary</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          <div className="rounded-lg bg-secondary/30 border border-border/40 p-2 text-center">
+          <div className="rounded-lg bg-white border border-border/40 p-2 text-center">
             <p className="text-xs text-muted-foreground mb-1">Urgent</p>
             <p className="text-lg font-bold text-destructive">{harvestPredictions.filter((p) => p.estimatedDaysToHarvest <= 3).length}</p>
           </div>
-          <div className="rounded-lg bg-secondary/30 border border-border/40 p-2 text-center">
+          <div className="rounded-lg bg-white border border-border/40 p-2 text-center">
             <p className="text-xs text-muted-foreground mb-1">Soon</p>
             <p className="text-lg font-bold text-warning">{harvestPredictions.filter((p) => p.estimatedDaysToHarvest > 3 && p.estimatedDaysToHarvest <= 7).length}</p>
           </div>
-          <div className="rounded-lg bg-secondary/30 border border-border/40 p-2 text-center">
+          <div className="rounded-lg bg-white border border-border/40 p-2 text-center">
             <p className="text-xs text-muted-foreground mb-1">Total Yield</p>
             <p className="text-lg font-bold text-neon-green">{harvestPredictions.reduce((sum, p) => sum + p.expectedYield, 0).toFixed(1)} kg</p>
           </div>
-          <div className="rounded-lg bg-secondary/30 border border-border/40 p-2 text-center">
+          <div className="rounded-lg bg-white border border-border/40 p-2 text-center">
             <p className="text-xs text-muted-foreground mb-1">Avg Confidence</p>
             <p className="text-lg font-bold text-neon-aqua">{Math.round(harvestPredictions.reduce((sum, p) => sum + p.confidenceLevel, 0) / harvestPredictions.length)}%</p>
           </div>

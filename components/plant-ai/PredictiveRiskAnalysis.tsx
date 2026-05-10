@@ -50,7 +50,7 @@ export function PredictiveRiskAnalysis() {
           const config = severityConfig[risk.severity]
 
           return (
-            <div key={risk.riskType} className={`relative overflow-hidden rounded-xl border ${config.border} bg-gradient-to-r from-background/40 via-secondary/10 to-background/20 p-4 transition-all hover:shadow-md`}>
+            <div key={risk.riskType} className={`relative overflow-hidden rounded-xl border ${config.border} bg-white p-4 transition-all hover:shadow-md`}>
               {/* Severity Stripe */}
               <div className={`absolute left-0 top-0 h-full w-1 ${config.indicator}`} />
 
@@ -90,7 +90,7 @@ export function PredictiveRiskAnalysis() {
                 </div>
 
                 {/* Recommended Response */}
-                <div className="mb-3 rounded-lg bg-secondary/30 border border-border/40 p-3">
+                <div className="mb-3 rounded-lg bg-white border border-border/40 p-3">
                   <p className="text-xs font-semibold text-foreground mb-1">Recommended Response:</p>
                   <p className="text-sm text-muted-foreground">{risk.recommendedResponse}</p>
                 </div>
