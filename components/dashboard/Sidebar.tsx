@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BarChart3, Droplets, Leaf, LineChart, Settings, Shield, Cpu } from 'lucide-react'
+import { BarChart3, Droplets, Leaf, LineChart, Shield, Cpu } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function Sidebar() {
@@ -33,11 +33,6 @@ export function Sidebar() {
       label: 'Analytics & Sustainability',
       href: '/analytics',
       icon: LineChart,
-    },
-    {
-      label: 'Settings',
-      href: '/settings',
-      icon: Settings,
     },
   ]
 

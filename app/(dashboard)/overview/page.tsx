@@ -1,5 +1,5 @@
-import { OverviewDashboard } from "@/components/dashboard/OverviewDashboard"
+import { OverviewClientWrapper } from "@/components/farm/OverviewClientWrapper"
 
 export default function OverviewPage() {
-  return <OverviewDashboard />
+  return <OverviewClientWrapper />
 }
