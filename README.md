@@ -1,7 +1,7 @@
 # AquaVita OS — Precision Urban Agriculture Platform  
 ### AI-Powered Vertical Farming Intelligence System
 
-TEAM: AQUAVITA
+TEAM: HUSTLE SQUAD
 
 ---
 
