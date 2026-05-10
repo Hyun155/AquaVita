@@ -61,6 +61,84 @@ function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
+interface ManualAnalysisView {
+  plantType: string
+  detectedAbnormality: string
+  symptom: string
+  confidence: number
+  healthScore: number
+  suggestedResponse: string
+}
+
+const manualMockByFileName: Record<string, ManualAnalysisView> = {
+  "Lettuce-test 1.png": {
+    plantType: "Lettuce",
+    detectedAbnormality: "Nitrogen Deficiency",
+    symptom: "Lower leaves are yellowing and growth appears slower.",
+    confidence: 97,
+    healthScore: 72,
+    suggestedResponse: "Increase nitrogen dosing gradually and recheck leaf color in 24 hours.",
+  },
+  "Spinach-test 2.png": {
+    plantType: "Spinach",
+    detectedAbnormality: "Leaf Spot",
+    symptom: "Brown or black circular lesions visible on leaf surfaces.",
+    confidence: 79,
+    healthScore: 69,
+    suggestedResponse: "Isolate affected plants and apply a targeted antifungal treatment.",
+  },
+}
+
+const diagnosisToAbnormality: Record<DiseaseDetectionResult["diagnosis"], string> = {
+  "Leaf Spot Detected": "Leaf Spot",
+  "Nitrogen Deficiency Likely": "Nitrogen Deficiency",
+  "Healthy Plant": "No abnormality detected",
+  "Fungal Infection Risk": "Fungal Infection",
+  "Pest Infestation": "Pest Infestation",
+  "Dehydration Stress": "Dehydration Stress",
+}
+
+const abnormalitySymptoms: Record<string, string> = {
+  "Leaf Spot": "Brown or black circular lesions visible on leaf surfaces.",
+  "Nitrogen Deficiency": "Lower leaves are yellowing and growth appears slower.",
+  "No abnormality detected": "No significant disease or deficiency symptoms detected.",
+  "Fungal Infection": "White or gray fungal patches with spreading leaf damage.",
+  "Pest Infestation": "Bite marks, webbing, or clustered pest activity on leaves.",
+  "Dehydration Stress": "Leaf curling, wilting, and dry tissue edges are present.",
+}
+
+const abnormalityResponses: Record<string, string> = {
+  "Leaf Spot": "Isolate affected plants and apply a targeted antifungal treatment.",
+  "Nitrogen Deficiency": "Increase nitrogen dosing gradually and recheck leaf color in 24 hours.",
+  "No abnormality detected": "Maintain current nutrient and climate settings with routine monitoring.",
+  "Fungal Infection": "Lower humidity, improve airflow, and initiate fungal containment protocol.",
+  "Pest Infestation": "Apply organic pest control and inspect nearby plants for spread.",
+  "Dehydration Stress": "Increase irrigation cycle and verify water distribution consistency.",
+}
+
+function inferPlantTypeFromFileName(fileName: string): string {
+  const normalized = fileName.toLowerCase()
+  if (normalized.includes("basil")) return "Basil"
+  if (normalized.includes("lettuce")) return "Lettuce"
+  if (normalized.includes("mint")) return "Mint"
+  if (normalized.includes("kale")) return "Kale"
+  if (normalized.includes("spinach")) return "Spinach"
+  return "Unknown Plant"
+}
+
+function toManualAnalysisView(result: DiseaseDetectionResult, fileName: string): ManualAnalysisView {
+  const detectedAbnormality = diagnosisToAbnormality[result.diagnosis] ?? result.diagnosis
+  return {
+    plantType: inferPlantTypeFromFileName(fileName),
+    detectedAbnormality,
+    symptom: abnormalitySymptoms[detectedAbnormality] ?? "Symptoms are under review by AI model.",
+    confidence: result.confidence,
+    healthScore: result.healthScore,
+    suggestedResponse:
+      abnormalityResponses[detectedAbnormality] ?? "Continue monitoring and adjust settings based on trend.",
+  }
+}
+
 function buildSickPlantSVG(result: DiseaseAutoScanResult) {
   // Three stylized SVG leaf images representing common issues.
   if (result.issue === "Downy Mildew") {
@@ -149,7 +227,7 @@ export function DiseaseDetectionPanel() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isAutoScanEnabled, setIsAutoScanEnabled] = useState(false)
-  const [manualResult, setManualResult] = useState<DiseaseDetectionResult | null>(null)
+  const [manualResult, setManualResult] = useState<ManualAnalysisView | null>(null)
   const [autoResult, setAutoResult] = useState<DiseaseAutoScanResult | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -205,9 +283,16 @@ export function DiseaseDetectionPanel() {
     setManualResult(null)
     setIsProcessing(true)
 
+    const exactMockResult = manualMockByFileName[file.name]
+    if (exactMockResult) {
+      setManualResult(exactMockResult)
+      setIsProcessing(false)
+      return
+    }
+
     // Try remote AI analysis; fallback to local mock analysis.
     analyzeImage(file)
-      .then((res) => setManualResult(res))
+      .then((res) => setManualResult(toManualAnalysisView(res, file.name)))
       .catch(() => {
         const diagnosis = fakeDiagnoses[randomInt(0, fakeDiagnoses.length - 1)]
         const confidence = randomInt(78, 98)
@@ -218,7 +303,13 @@ export function DiseaseDetectionPanel() {
               ? randomInt(45, 72)
               : randomInt(50, 78)
 
-        setManualResult({ diagnosis, confidence, healthScore, detectionMethod: "manual" })
+        const fallbackResult: DiseaseDetectionResult = {
+          diagnosis,
+          confidence,
+          healthScore,
+          detectionMethod: "manual",
+        }
+        setManualResult(toManualAnalysisView(fallbackResult, file.name))
       })
       .finally(() => setIsProcessing(false))
   }
@@ -324,8 +415,19 @@ export function DiseaseDetectionPanel() {
         </div>
 
         {manualResult && !isProcessing && !isAutoScanEnabled && (
-          <div className="space-y-2 rounded-xl border border-border/50 bg-white p-3 animate-in fade-in slide-in-from-bottom-2">
-            <p className="text-sm font-medium text-foreground">{manualResult.diagnosis}</p>
+          <div className="space-y-3 rounded-xl border border-border/50 bg-white p-3 animate-in fade-in slide-in-from-bottom-2">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-foreground">{manualResult.plantType}</p>
+                <p className="text-xs text-muted-foreground">Detected abnormality: {manualResult.detectedAbnormality}</p>
+              </div>
+              <span className="rounded-full border border-neon-green/30 bg-neon-green/10 px-2 py-1 text-[11px] font-semibold text-neon-green">
+                Manual Upload
+              </span>
+            </div>
+
+            <p className="text-sm font-medium text-foreground">Symptom: {manualResult.symptom}</p>
+
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="rounded-lg border border-border/40 bg-white p-2 text-muted-foreground">
                 Confidence
@@ -335,6 +437,10 @@ export function DiseaseDetectionPanel() {
                 Health score
                 <p className="mt-0.5 text-sm font-semibold text-neon-aqua">{manualResult.healthScore}%</p>
               </div>
+            </div>
+
+            <div className="rounded-lg border border-border/40 bg-white p-2 text-xs text-muted-foreground">
+              Suggested response: <span className="font-medium text-foreground">{manualResult.suggestedResponse}</span>
             </div>
           </div>
         )}
