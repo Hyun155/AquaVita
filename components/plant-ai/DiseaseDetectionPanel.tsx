@@ -205,21 +205,43 @@ export function DiseaseDetectionPanel() {
     setManualResult(null)
     setIsProcessing(true)
 
-    // Fake model latency + randomized diagnosis to simulate an AI inference pipeline.
-    const processingDelay = randomInt(1000, 2000)
-    window.setTimeout(() => {
-      const diagnosis = fakeDiagnoses[randomInt(0, fakeDiagnoses.length - 1)]
-      const confidence = randomInt(78, 98)
-      const healthScore =
-        diagnosis === "Healthy Plant"
-          ? randomInt(82, 99)
-          : diagnosis === "Leaf Spot Detected"
-            ? randomInt(45, 72)
-            : randomInt(50, 78)
+    // Try remote AI analysis; fallback to local mock analysis.
+    analyzeImage(file)
+      .then((res) => setManualResult(res))
+      .catch(() => {
+        const diagnosis = fakeDiagnoses[randomInt(0, fakeDiagnoses.length - 1)]
+        const confidence = randomInt(78, 98)
+        const healthScore =
+          diagnosis === "Healthy Plant"
+            ? randomInt(82, 99)
+            : diagnosis === "Leaf Spot Detected"
+              ? randomInt(45, 72)
+              : randomInt(50, 78)
 
-      setManualResult({ diagnosis, confidence, healthScore, detectionMethod: "manual" })
-      setIsProcessing(false)
-    }, processingDelay)
+        setManualResult({ diagnosis, confidence, healthScore, detectionMethod: "manual" })
+      })
+      .finally(() => setIsProcessing(false))
+  }
+
+  async function analyzeImage(file: File): Promise<DiseaseDetectionResult> {
+    try {
+      const form = new FormData()
+      form.append("image", file)
+
+      const res = await fetch("/api/disease-detect", {
+        method: "POST",
+        body: form,
+      })
+
+      if (!res.ok) throw new Error("remote analysis failed")
+
+      // Expect the API to return a JSON matching DiseaseDetectionResult shape
+      const json = await res.json()
+      return json as DiseaseDetectionResult
+    } catch (err) {
+      // Bubble up error to let caller fallback
+      throw err
+    }
   }
 
   const startAutoScan = () => {
