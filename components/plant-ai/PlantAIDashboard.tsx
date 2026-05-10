@@ -425,9 +425,9 @@ function buildAdaptiveInsight(plants: PlantTelemetry[], interventions: PlantAIDa
   const metricCounts = actionLog.reduce(
     (counts, action) => ({
       ...counts,
-      [action.metric]: counts[action.metric] + 1,
+      [action.metric]: (counts[action.metric as string] ?? 0) + 1,
     }),
-    { pH: 0, temperature: 0 },
+    {} as Record<string, number>,
   )
 
   const dominantMetric = metricCounts.pH >= metricCounts.temperature ? "pH" : "temperature"
@@ -612,11 +612,113 @@ export function PlantAIDashboard() {
   const [selectedPlantId, setSelectedPlantId] = useState<string>(initialPlants[0]?.id ?? "lettuce-a")
   const [stressMode, setStressMode] = useState(false)
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
-  const [actionLog, setActionLog] = useState<AutomationAction[]>([])
+  const [actionLog, setActionLog] = useState<AutomationAction[]>([
+    {
+      id: "action-1",
+      plantId: "lettuce-a",
+      plantName: "Lettuce A",
+      metric: "pH",
+      message: "Automated pH stabilization successful for Basil B; high pH 7.40 was corrected.",
+      timestamp: "2:13:39 AM",
+    },
+    {
+      id: "action-2",
+      plantId: "basil-b",
+      plantName: "Basil B",
+      metric: "TEMPERATURE",
+      message: "Predicted heat stress in Basil B; automated airflow reduced canopy temperature.",
+      timestamp: "2:13:39 AM",
+    },
+    {
+      id: "action-3",
+      plantId: "spinach-c",
+      plantName: "Spinach C",
+      metric: "NUTRIENTS",
+      message: "Nitrogen dosing adjusted for Kale E based on growth rate anomaly.",
+      timestamp: "2:12:41 AM",
+    },
+    {
+      id: "action-4",
+      plantId: "mint-d",
+      plantName: "Layer 4",
+      metric: "CLIMATE",
+      message: "Ventilation increased by 18% due to rising humidity in Layer 4.",
+      timestamp: "2:12:41 AM",
+    },
+    {
+      id: "action-5",
+      plantId: "kale-e",
+      plantName: "Mint D",
+      metric: "LIGHT",
+      message: "LED intensity optimized for Mint D based on PAR levels.",
+      timestamp: "2:12:40 AM",
+    },
+    {
+      id: "action-6",
+      plantId: "lettuce-a",
+      plantName: "System",
+      metric: "SYSTEM",
+      message: "System self-check completed. All parameters within optimal range.",
+      timestamp: "2:13:39 AM",
+    },
+  ])
   const [recoveryState, setRecoveryState] = useState<Record<string, { progress: number; active: boolean }>>({})
   const [interventions, setInterventions] = useState<
     PlantAIDashboardIntervention[]
   >([])
+  const [actionLogFilter, setActionLogFilter] = useState<"all" | "environment" | "nutrients" | "climate" | "system">("all")
+
+  const getActionIcon = (metric: string) => {
+    const metricLower = metric.toLowerCase()
+    if (metricLower.includes("ph") || metricLower.includes("nutrient")) return "nutrients"
+    if (metricLower.includes("temp") || metricLower.includes("humidity") || metricLower.includes("climate") || metricLower.includes("ventilation")) return "environment"
+    if (metricLower.includes("light") || metricLower.includes("led")) return "light"
+    if (metricLower.includes("health") || metricLower.includes("system")) return "system"
+    return "all"
+  }
+
+  const getActionBgColor = (metric: string) => {
+    const type = getActionIcon(metric)
+    switch(type) {
+      case "nutrients": return "bg-emerald-100"
+      case "environment": return "bg-red-100"
+      case "light": return "bg-purple-100"
+      case "system": return "bg-cyan-100"
+      default: return "bg-slate-100"
+    }
+  }
+
+  const getActionIconColor = (metric: string) => {
+    const type = getActionIcon(metric)
+    switch(type) {
+      case "nutrients": return "text-emerald-600"
+      case "environment": return "text-red-600"
+      case "light": return "text-purple-600"
+      case "system": return "text-cyan-600"
+      default: return "text-slate-600"
+    }
+  }
+
+  const getMetricCategory = (metric: string) => {
+    const metricLower = metric.toLowerCase()
+    if (metricLower.includes("ph") || metricLower.includes("nutrient")) return "nutrients"
+    if (metricLower.includes("temp") || metricLower.includes("humidity") || metricLower.includes("climate") || metricLower.includes("ventilation")) return "environment"
+    if (metricLower.includes("light") || metricLower.includes("led")) return "climate"
+    if (metricLower.includes("health") || metricLower.includes("system")) return "system"
+    return "all"
+  }
+
+  const getMetricBadgeColor = (category: string) => {
+    switch(category) {
+      case "nutrients": return "bg-emerald-100 text-emerald-700 border-emerald-200"
+      case "environment": return "bg-red-100 text-red-700 border-red-200"
+      case "climate": return "bg-purple-100 text-purple-700 border-purple-200"
+      case "system": return "bg-cyan-100 text-cyan-700 border-cyan-200"
+      default: return "bg-slate-100 text-slate-700 border-slate-200"
+    }
+  }
+
+  const filteredActionLog = actionLogFilter === "all" ? actionLog : actionLog.filter(action => getMetricCategory(action.metric) === actionLogFilter)
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -872,8 +974,8 @@ export function PlantAIDashboard() {
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <div className="space-y-4 xl:col-span-2">
+      <section className="space-y-6">
+        <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
             <div>
               <h2 className="text-lg font-semibold text-foreground">Plant Growth Performance</h2>
@@ -885,7 +987,7 @@ export function PlantAIDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.6fr)_minmax(24rem,0.95fr)]">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1fr)]">
             <div className="rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.94),rgba(248,250,252,0.88)_42%,rgba(236,253,245,0.76))] p-4 shadow-[0_22px_50px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div>
@@ -975,8 +1077,9 @@ export function PlantAIDashboard() {
             </div>
 
             {selectedPlant && selectedProfile && selectedSummary && (
-              <div className="rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(248,250,252,0.9)_44%,rgba(236,253,245,0.8))] p-4 shadow-[0_22px_50px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl xl:sticky xl:top-4">
-                <div className="mb-4 flex items-start justify-between gap-3">
+              <div className="rounded-[2rem] border border-slate-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(248,250,252,0.9)_44%,rgba(236,253,245,0.8))] p-6 shadow-[0_22px_50px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl flex flex-col max-h-[650px]">
+                {/* Header with Badge - Fixed */}
+                <div className="mb-4 flex items-start justify-between gap-3 flex-shrink-0">
                   <div>
                     <p className="inline-flex items-center gap-2 rounded-full border border-neon-green/20 bg-neon-green/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-600 shadow-[0_0_0_1px_rgba(34,197,94,0.04)]">
                       <Sparkles className="h-3.5 w-3.5" />
@@ -990,173 +1093,256 @@ export function PlantAIDashboard() {
                   </div>
                 </div>
 
-                <ScrollArea className="h-[34rem] pr-3">
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
-                      <div className="rounded-2xl border border-slate-200 bg-white/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        <p className="text-slate-500">Health</p>
-                        <p className="mt-1 text-xl font-bold text-slate-900">{Math.round(selectedPlant.health)}%</p>
-                      </div>
-                      <div className="rounded-2xl border border-slate-200 bg-white/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        <p className="text-slate-500">pH</p>
-                        <p className="mt-1 text-xl font-bold text-slate-900">{selectedPlant.ph.toFixed(2)}</p>
-                      </div>
-                      <div className="rounded-2xl border border-slate-200 bg-white/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        <p className="text-slate-500">Temp</p>
-                        <p className="mt-1 text-xl font-bold text-slate-900">{selectedPlant.temperature.toFixed(1)}°C</p>
-                      </div>
-                      <div className="rounded-2xl border border-slate-200 bg-white/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        <p className="text-slate-500">Humidity</p>
-                        <p className="mt-1 text-xl font-bold text-slate-900">{selectedPlant.humidity}%</p>
-                      </div>
-                    </div>
+                {/* Scrollable Content */}
+                <ScrollArea className="flex-1 overflow-hidden">
+                  <div className="space-y-6 pr-4">
 
-                    <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                      <div className="mb-3 flex items-center justify-between">
-                        <p className="text-sm font-semibold text-slate-900">Current telemetry</p>
-                        <span className="text-xs text-slate-500">Trend: {selectedSummary.trend.label}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                          <p className="text-slate-500">Light</p>
-                          <p className="mt-1 font-semibold text-slate-900">{selectedPlant.lightIntensity} µmol</p>
+                  {/* Health Indicators Grid with Visual Elements */}
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Health Percentage */}
+                    <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-xs text-slate-500 font-medium">Leaf color</p>
+                          <p className="mt-2 text-sm font-semibold text-slate-900 capitalize">{selectedPlant.healthIndicators.leafColor}</p>
                         </div>
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                          <p className="text-slate-500">EC</p>
-                          <p className="mt-1 font-semibold text-slate-900">{selectedPlant.ec.toFixed(1)}</p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                          <p className="text-slate-500">Risk score</p>
-                          <p className="mt-1 font-semibold text-slate-900">{selectedSummary.riskScore}</p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                          <p className="text-slate-500">Harvest ETA</p>
-                          <p className="mt-1 font-semibold text-neon-green">{selectedSummary.daysToHarvest}d</p>
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          selectedPlant.healthIndicators.leafColor === "vibrant" 
+                            ? "bg-green-100" 
+                            : selectedPlant.healthIndicators.leafColor === "pale"
+                            ? "bg-yellow-100"
+                            : "bg-amber-100"
+                        }`}>
+                          <Leaf className={`h-5 w-5 ${
+                            selectedPlant.healthIndicators.leafColor === "vibrant" 
+                              ? "text-green-600" 
+                              : selectedPlant.healthIndicators.leafColor === "pale"
+                              ? "text-yellow-600"
+                              : "text-amber-600"
+                          }`} />
                         </div>
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                      <p className="mb-3 text-sm font-semibold text-slate-900">Plant profile</p>
-                      <div className="grid gap-3 text-xs sm:grid-cols-2">
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                          <p className="text-slate-500">Growth speed</p>
-                          <p className="mt-1 font-medium text-slate-900">{selectedProfile.growthSpeed}</p>
+                    {/* Leaf Condition */}
+                    <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-xs text-slate-500 font-medium">Leaf condition</p>
+                          <p className="mt-2 text-sm font-semibold text-slate-900 capitalize">{selectedPlant.healthIndicators.leafCondition}</p>
                         </div>
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                          <p className="text-slate-500">Ideal for</p>
-                          <p className="mt-1 font-medium text-slate-900">{selectedProfile.idealFor ?? "General hydroponic conditions"}</p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                          <p className="text-slate-500">Leaf structure</p>
-                          <p className="mt-1 font-medium text-slate-900">{selectedProfile.leafTypeOrStructure ?? "Standard leafy structure"}</p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                          <p className="text-slate-500">Harvest ready</p>
-                          <p className="mt-1 font-medium text-slate-900">{selectedProfile.harvestReadyDays ?? "—"} days</p>
-                        </div>
-                      </div>
-
-                      <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                          <p className="text-slate-500">Optimal pH</p>
-                          <p className="mt-1 font-medium text-slate-900">{selectedProfile.optimalPh}</p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                          <p className="text-slate-500">Optimal temp</p>
-                          <p className="mt-1 font-medium text-slate-900">{selectedProfile.optimalTemperature}</p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-3 sm:col-span-2">
-                          <p className="text-slate-500">Optimal humidity</p>
-                          <p className="mt-1 font-medium text-slate-900">{selectedProfile.optimalHumidity ?? "—"}</p>
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          selectedPlant.healthIndicators.leafCondition === "pristine" 
+                            ? "bg-emerald-100" 
+                            : selectedPlant.healthIndicators.leafCondition === "good"
+                            ? "bg-green-100"
+                            : "bg-amber-100"
+                        }`}>
+                          <Leaf className={`h-5 w-5 ${
+                            selectedPlant.healthIndicators.leafCondition === "pristine" 
+                              ? "text-emerald-600" 
+                              : selectedPlant.healthIndicators.leafCondition === "good"
+                              ? "text-green-600"
+                              : "text-amber-600"
+                          }`} />
                         </div>
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                      <p className="mb-2 text-sm font-semibold text-slate-900">Sensitivities</p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedProfile.sensitivities.map((item) => (
-                          <span key={item} className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] text-emerald-700 shadow-[0_0_18px_rgba(34,197,94,0.05)]">
-                            {item}
-                          </span>
-                        ))}
+                    {/* Nitrogen Status */}
+                    <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-xs text-slate-500 font-medium">Nitrogen</p>
+                          <p className="mt-2 text-lg font-bold text-slate-900">{selectedPlant.healthIndicators.nitrogenStatus}%</p>
+                        </div>
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                          <span className="text-xs font-bold text-blue-600">N</span>
+                        </div>
+                      </div>
+                      <div className="mt-3 h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">
+                        <div 
+                          className="h-full rounded-full bg-blue-500" 
+                          style={{ width: `${selectedPlant.healthIndicators.nitrogenStatus}%` }}
+                        />
                       </div>
                     </div>
 
+                    {/* Hydration Level */}
+                    <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="text-xs text-slate-500 font-medium">Hydration</p>
+                          <p className="mt-2 text-lg font-bold text-slate-900">{selectedPlant.healthIndicators.hydrationLevel}%</p>
+                        </div>
+                        <div className="w-10 h-10 rounded-lg bg-cyan-100 flex items-center justify-center">
+                          <Droplets className="h-5 w-5 text-cyan-600" />
+                        </div>
+                      </div>
+                      <div className="mt-3 h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">
+                        <div 
+                          className="h-full rounded-full bg-cyan-500" 
+                          style={{ width: `${selectedPlant.healthIndicators.hydrationLevel}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Main Health Score */}
+                  <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-green-50/50 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm font-semibold text-slate-900">Overall Health</p>
+                      <p className="text-3xl font-bold text-emerald-600">{Math.round(selectedPlant.health)}%</p>
+                    </div>
+                    <div className="h-3 w-full rounded-full bg-emerald-100 overflow-hidden">
+                      <div 
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-green-500" 
+                        style={{ width: `${selectedPlant.health}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Telemetry and Info */}
+                  <div className="space-y-3">
                     <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                      <p className="mb-2 text-sm font-semibold text-slate-900">Common issues</p>
-                      <div className="space-y-2 text-xs text-slate-600">
-                        {selectedProfile.commonIssues.map((item) => (
-                          <div key={item} className="flex gap-2">
-                            <Leaf className="mt-0.5 h-3.5 w-3.5 text-emerald-500" />
-                            <span>{item}</span>
+                        <div className="mb-3 flex items-center justify-between">
+                          <p className="text-sm font-semibold text-slate-900">Current telemetry</p>
+                          <span className="text-xs text-slate-500">Trend: {selectedSummary.trend.label}</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                            <p className="text-slate-500">Light</p>
+                            <p className="mt-1 font-semibold text-slate-900">{selectedPlant.lightIntensity} µmol</p>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                      <p className="mb-2 text-sm font-semibold text-slate-900">Simulation behavior</p>
-                      <div className="space-y-2 text-xs text-slate-600">
-                        {selectedProfile.simulationBehavior.map((item) => (
-                          <div key={item} className="flex gap-2">
-                            <Gauge className="mt-0.5 h-3.5 w-3.5 text-emerald-500" />
-                            <span>{item}</span>
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                            <p className="text-slate-500">EC</p>
+                            <p className="mt-1 font-semibold text-slate-900">{selectedPlant.ec.toFixed(1)}</p>
                           </div>
-                        ))}
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                            <p className="text-slate-500">Risk score</p>
+                            <p className="mt-1 font-semibold text-slate-900">{selectedSummary.riskScore}</p>
+                          </div>
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                            <p className="text-slate-500">Harvest ETA</p>
+                            <p className="mt-1 font-semibold text-emerald-600">{selectedSummary.daysToHarvest}d</p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
 
-                    {selectedProfile.ledSpectrumNeeds && (
                       <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        <p className="mb-2 text-sm font-semibold text-slate-900">LED spectrum needs</p>
+                        <p className="mb-3 text-sm font-semibold text-slate-900">Plant profile</p>
+                        <div className="grid gap-3 text-xs sm:grid-cols-2">
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
+                            <p className="text-slate-500">Growth speed</p>
+                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.growthSpeed}</p>
+                          </div>
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
+                            <p className="text-slate-500">Ideal for</p>
+                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.idealFor ?? "General hydroponic conditions"}</p>
+                          </div>
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
+                            <p className="text-slate-500">Leaf structure</p>
+                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.leafTypeOrStructure ?? "Standard leafy structure"}</p>
+                          </div>
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
+                            <p className="text-slate-500">Harvest ready</p>
+                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.harvestReadyDays ?? "—"} days</p>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
+                            <p className="text-slate-500">Optimal pH</p>
+                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.optimalPh}</p>
+                          </div>
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
+                            <p className="text-slate-500">Optimal temp</p>
+                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.optimalTemperature}</p>
+                          </div>
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3 sm:col-span-2">
+                            <p className="text-slate-500">Optimal humidity</p>
+                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.optimalHumidity ?? "—"}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                        <p className="mb-2 text-sm font-semibold text-slate-900">Sensitivities</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedProfile.sensitivities.map((item) => (
+                            <span key={item} className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] text-emerald-700 shadow-[0_0_18px_rgba(34,197,94,0.05)]">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                        <p className="mb-2 text-sm font-semibold text-slate-900">Common issues</p>
                         <div className="space-y-2 text-xs text-slate-600">
-                          {Object.entries(selectedProfile.ledSpectrumNeeds).map(([stage, value]) => (
-                            <div key={stage} className="flex items-start gap-2">
-                              <SunMedium className="mt-0.5 h-3.5 w-3.5 text-emerald-500" />
-                              <span>
-                                <span className="font-medium text-slate-900 capitalize">{stage}</span>: {value}
-                              </span>
+                          {selectedProfile.commonIssues.map((item) => (
+                            <div key={item} className="flex gap-2">
+                              <Leaf className="mt-0.5 h-3.5 w-3.5 text-emerald-500" />
+                              <span>{item}</span>
                             </div>
                           ))}
                         </div>
                       </div>
-                    )}
 
-                    <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                      <p className="mb-2 text-sm font-semibold text-slate-900">Health indicators</p>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                          <p className="text-slate-500">Leaf color</p>
-                          <p className="mt-1 font-medium text-slate-900">{selectedPlant.healthIndicators.leafColor}</p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                          <p className="text-slate-500">Leaf condition</p>
-                          <p className="mt-1 font-medium text-slate-900">{selectedPlant.healthIndicators.leafCondition}</p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                          <p className="text-slate-500">Nitrogen</p>
-                          <p className="mt-1 font-medium text-slate-900">{selectedPlant.healthIndicators.nitrogenStatus}%</p>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                          <p className="text-slate-500">Hydration</p>
-                          <p className="mt-1 font-medium text-slate-900">{selectedPlant.healthIndicators.hydrationLevel}%</p>
-                        </div>
-                      </div>
-
-                      {selectedPlant.healthIndicators.stressSignals.length > 0 ? (
-                        <div className="mt-3 space-y-2 text-xs text-slate-600">
-                          {selectedPlant.healthIndicators.stressSignals.map((signal) => (
-                            <div key={signal} className="flex gap-2">
-                              <Zap className="mt-0.5 h-3.5 w-3.5 text-amber-500" />
-                              <span>{signal}</span>
+                      <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                        <p className="mb-2 text-sm font-semibold text-slate-900">Simulation behavior</p>
+                        <div className="space-y-2 text-xs text-slate-600">
+                          {selectedProfile.simulationBehavior.map((item) => (
+                            <div key={item} className="flex gap-2">
+                              <Gauge className="mt-0.5 h-3.5 w-3.5 text-emerald-500" />
+                              <span>{item}</span>
                             </div>
                           ))}
                         </div>
-                      ) : (
-                        <p className="mt-3 text-xs text-slate-600">No active stress signals detected for this plant.</p>
+                      </div>
+
+                      {selectedProfile.ledSpectrumNeeds && (
+                        <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                          <p className="mb-2 text-sm font-semibold text-slate-900">LED spectrum needs</p>
+                          <div className="space-y-2 text-xs text-slate-600">
+                            {Object.entries(selectedProfile.ledSpectrumNeeds).map(([stage, value]) => (
+                              <div key={stage} className="flex items-start gap-2">
+                                <SunMedium className="mt-0.5 h-3.5 w-3.5 text-emerald-500" />
+                                <span>
+                                  <span className="font-medium text-slate-900 capitalize">{stage}</span>: {value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
+
+                      <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                        <p className="mb-2 text-sm font-semibold text-slate-900">Additional health details</p>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                            <p className="text-slate-500">Nitrogen</p>
+                            <p className="mt-1 font-medium text-slate-900">{selectedPlant.healthIndicators.nitrogenStatus}%</p>
+                          </div>
+                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                            <p className="text-slate-500">Nutrient balance</p>
+                            <p className="mt-1 font-medium text-slate-900">{selectedPlant.healthIndicators.nutrientBalance}%</p>
+                          </div>
+                        </div>
+
+                        {selectedPlant.healthIndicators.stressSignals.length > 0 ? (
+                          <div className="mt-3 space-y-2 text-xs text-slate-600">
+                            {selectedPlant.healthIndicators.stressSignals.map((signal) => (
+                              <div key={signal} className="flex gap-2">
+                                <Zap className="mt-0.5 h-3.5 w-3.5 text-amber-500" />
+                                <span>{signal}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mt-3 text-xs text-slate-600">No active stress signals detected for this plant.</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </ScrollArea>
@@ -1165,16 +1351,21 @@ export function PlantAIDashboard() {
           </div>
         </div>
 
-        <aside className="space-y-4">
-          <DiseaseDetectionPanel />
+        {/* Three Panels Side by Side Below Plant Performance */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          {/* Disease Detection Panel */}
+          <div>
+            <DiseaseDetectionPanel />
+          </div>
 
-          <section className="relative overflow-hidden rounded-2xl border border-neon-aqua/25 bg-gradient-to-br from-background/90 via-slate-950/95 to-background/75 p-5 shadow-[0_0_0_1px_rgba(45,212,191,0.08),0_24px_60px_rgba(0,0,0,0.28)]">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.10),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(34,197,94,0.08),transparent_30%)]" />
+          {/* AI Recommendations Panel */}
+          <section className="relative overflow-hidden rounded-2xl border border-neon-aqua/30 bg-gradient-to-br from-slate-50 via-white to-cyan-50/30 p-5 shadow-[0_8px_24px_rgba(45,212,191,0.12),inset_0_1px_0_rgba(255,255,255,0.9)]">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(45,212,191,0.06),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(34,197,94,0.04),transparent_40%)]" />
             <div className="relative mb-4 flex items-start justify-between gap-3">
               <div>
                 <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-neon-aqua/30 bg-neon-aqua/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-aqua">Live Triage</p>
                 <h3 className="text-base font-semibold tracking-tight text-foreground">AI Recommendations</h3>
-                <p className="text-xs text-muted-foreground">High-priority interventions with status-based grouping</p>
+                <p className="text-xs text-muted-foreground">High-priority interventions</p>
               </div>
               <span
                 className={`rounded-full border px-3 py-1 text-xs font-semibold tracking-wide ${
@@ -1187,8 +1378,8 @@ export function PlantAIDashboard() {
               </span>
             </div>
 
-            <div className="relative rounded-2xl border border-neon-aqua/15 bg-black/15 p-3">
-              <div className="h-[25rem] space-y-3 overflow-y-auto pr-1">
+            <div className="relative rounded-2xl border border-neon-aqua/20 bg-white/60 backdrop-blur-sm p-3">
+              <div className="max-h-96 space-y-3 overflow-y-auto pr-1">
               {/* Group recommendations by status: in-progress, auto-resolved, manual-overridden */}
               {(() => {
                 const inProgress = recommendations.filter((rec) => interventions.some((iv) => iv.plantId === rec.plantId && iv.status === "in-progress"))
@@ -1277,54 +1468,101 @@ export function PlantAIDashboard() {
             </div>
           </section>
 
-          <section className="relative overflow-hidden rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-background/90 via-slate-950/95 to-background/75 p-5 shadow-[0_0_0_1px_rgba(34,211,238,0.06),0_24px_60px_rgba(0,0,0,0.28)]">
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(34,211,238,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(34,211,238,0.06)_1px,transparent_1px)] bg-[size:22px_22px] opacity-35" />
-            <div className="relative mb-4 flex items-start justify-between gap-3">
+          {/* Automated Action Log Panel */}
+          <section className="relative flex flex-col overflow-hidden rounded-2xl border border-cyan-400/30 bg-gradient-to-br from-blue-50 via-white to-cyan-50/40 p-5 shadow-[0_8px_24px_rgba(34,211,238,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] h-[600px]">
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:22px_22px] opacity-20" />
+            <div className="relative mb-4 flex flex-shrink-0 items-start justify-between gap-3">
               <div>
                 <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-neon-aqua/30 bg-neon-aqua/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-aqua">Telemetry Console</p>
                 <h3 className="text-base font-semibold tracking-tight text-foreground">Automated Action Log</h3>
-                <p className="text-xs text-muted-foreground">Controller responses triggered by the latest simulation tick</p>
+                <p className="text-xs text-muted-foreground">Recent responses</p>
               </div>
               <span className="rounded-full border border-neon-aqua/40 bg-neon-aqua/15 px-3 py-1 text-xs font-semibold tracking-wide text-neon-aqua">
-                {actionLog.length} recent
+                {filteredActionLog.length} recent
               </span>
             </div>
 
-            <div className="relative space-y-2.5">
+            {/* Filter Tabs */}
+            <div className="relative mb-4 flex flex-shrink-0 gap-2 overflow-x-auto pb-2">
+              {["all", "environment", "nutrients", "climate", "system"].map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => setActionLogFilter(filter as typeof actionLogFilter)}
+                  className={`flex-shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] transition-all ${
+                    actionLogFilter === filter
+                      ? "border-neon-aqua/60 bg-neon-aqua/20 text-neon-aqua"
+                      : "border-slate-200/60 bg-white/50 text-slate-600 hover:border-slate-300/60 hover:bg-white/70"
+                  }`}
+                >
+                  {filter === "all" && " All"}
+                  {filter === "environment" && " Environment"}
+                  {filter === "nutrients" && " Nutrients"}
+                  {filter === "climate" && " Climate"}
+                  {filter === "system" && " System"}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative flex-1 space-y-2.5 overflow-hidden flex flex-col">
               {/* Constrain log box height and add scroll to avoid filling the whole page */}
-              <div className="max-h-60 space-y-2 overflow-y-auto pr-1">
-                {actionLog.length > 0 ? (
+              <div className="flex-1 space-y-2 overflow-y-auto pr-1">
+                {filteredActionLog.length > 0 ? (
                   // show only the most recent 6 by default
-                  actionLog.slice(0, 6).map((action) => (
-                    <div key={action.id} className="rounded-2xl border border-cyan-500/15 bg-gradient-to-r from-cyan-500/5 via-background/50 to-emerald-500/5 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-medium leading-snug text-foreground">{action.message}</p>
-                          <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-cyan-300/80">
-                            {action.plantName} · {action.metric}
-                          </p>
+                  filteredActionLog.slice(0, 6).map((action, index) => {
+                    const category = getMetricCategory(action.metric)
+                    const badgeColor = getMetricBadgeColor(category)
+                    const iconBg = getActionBgColor(action.metric)
+                    const iconColor = getActionIconColor(action.metric)
+                    return (
+                      <div key={action.id} className="relative flex gap-3">
+                        {/* Timeline line */}
+                        {index < (filteredActionLog.length > 6 ? 5 : filteredActionLog.length - 1) && (
+                          <div className="absolute left-[1.15rem] top-10 h-6 w-0.5 bg-gradient-to-b from-cyan-300 to-cyan-100" />
+                        )}
+                        
+                        {/* Icon Circle */}
+                        <div className={`mt-1 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border ${iconBg} border-opacity-40`}>
+                          {category === "nutrients" && <Leaf className={`h-4.5 w-4.5 ${iconColor}`} />}
+                          {category === "environment" && <Droplets className={`h-4.5 w-4.5 ${iconColor}`} />}
+                          {category === "climate" && <Thermometer className={`h-4.5 w-4.5 ${iconColor}`} />}
+                          {category === "system" && <Activity className={`h-4.5 w-4.5 ${iconColor}`} />}
+                          {category === "all" && <Sparkles className={`h-4.5 w-4.5 ${iconColor}`} />}
                         </div>
-                        <span className="whitespace-nowrap rounded-full border border-border/40 bg-background/50 px-2 py-1 text-[11px] text-muted-foreground">
-                          {action.timestamp}
-                        </span>
+
+                        {/* Content */}
+                        <div className="flex flex-1 gap-3">
+                          <div className="flex-1 rounded-xl border border-slate-200/70 bg-white/80 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                            <p className="text-sm font-medium leading-snug text-foreground">{action.message}</p>
+                            <div className="mt-1.5 flex items-center gap-2">
+                              <span className="text-[10px] font-semibold text-slate-600">{action.plantName}</span>
+                              <span className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] ${badgeColor}`}>
+                                {action.metric}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-shrink-0 items-center justify-end">
+                            <span className="rounded-lg border border-slate-200/50 bg-white/70 px-2.5 py-1.5 text-[10px] font-semibold text-slate-600 whitespace-nowrap shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                              {action.timestamp}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    )
+                  })
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-cyan-500/20 bg-background/40 px-3 py-4 text-sm text-muted-foreground">
-                    No automated adjustments yet. The controller will log actions when a plant leaves the optimal range.
+                  <div className="rounded-2xl border border-dashed border-cyan-300/40 bg-cyan-50/40 px-3 py-4 text-sm text-muted-foreground">
+                    No automated adjustments yet.
                   </div>
                 )}
               </div>
 
               {/* show more button if there are more than displayed */}
-              {actionLog.length > 6 && (
-                <div className="flex items-center justify-center">
+              {filteredActionLog.length > 6 && (
+                <div className="flex flex-shrink-0 items-center justify-center pt-2">
                   <button
                     type="button"
                     onClick={() => {
                       // expand to show all recent entries
-                      // simple UX: replace actionLog with a sliced copy to show more — keep in memory small
                       setActionLog((prev) => prev.slice(0, 20))
                     }}
                     className="rounded-full border border-neon-aqua/30 bg-neon-aqua/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-neon-aqua transition-colors hover:bg-neon-aqua/20"
@@ -1335,8 +1573,7 @@ export function PlantAIDashboard() {
               )}
             </div>
           </section>
-
-        </aside>
+        </div>
       </section>
 
 

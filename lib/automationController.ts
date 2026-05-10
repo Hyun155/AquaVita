@@ -11,7 +11,7 @@ export interface AutomationAction {
   id: string
   plantId: string
   plantName: string
-  metric: "pH" | "temperature"
+  metric: "pH" | "temperature" | "TEMPERATURE" | "NUTRIENTS" | "CLIMATE" | "LIGHT" | "SYSTEM"
   message: string
   timestamp: string
 }
