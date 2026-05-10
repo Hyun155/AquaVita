@@ -30,7 +30,7 @@ export function VerticalLayerVisualization() {
                   : { label: "Alert", color: "from-destructive/40 to-destructive/10", badge: "bg-destructive/20 text-destructive border-destructive/30" }
 
           return (
-            <div key={layer.layerId} className={`group relative overflow-hidden rounded-xl border border-border/40 bg-gradient-to-r ${healthStatus.color} p-4 transition-all hover:border-border/60 hover:shadow-md`}>
+            <div key={layer.layerId} className={`group relative overflow-hidden rounded-xl border border-border/40 bg-white p-4 transition-all hover:border-border/60 hover:shadow-md`}>
               {/* Risk Indicator Stripe */}
               {layer.riskLevel !== "low" && (
                 <div
@@ -129,7 +129,7 @@ export function VerticalLayerVisualization() {
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Layer Status Summary</p>
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
           {layerHealthBreakdown.map((item) => (
-            <div key={item.layer} className="rounded-lg bg-secondary/30 border border-border/40 p-2 text-center">
+            <div key={item.layer} className="rounded-lg bg-white border border-border/40 p-2 text-center">
               <p className="text-xs font-medium text-foreground mb-1">Layer {item.layer}</p>
               <p className={`text-xs font-bold ${item.status === "Excellent" ? "text-success" : item.status === "Optimal" ? "text-neon-green" : item.status === "Caution" ? "text-warning" : "text-destructive"}`}>
                 {item.status}

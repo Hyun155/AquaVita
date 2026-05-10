@@ -874,12 +874,12 @@ export function PlantAIDashboard() {
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
-                <div className="rounded-xl border border-border/50 bg-secondary/30 px-3 py-2 text-xs text-muted-foreground">
+                <div className="rounded-xl border border-border/50 bg-white px-3 py-2 text-xs text-muted-foreground">
                 <p className="mb-0.5">Last telemetry sync</p>
                 <p className="font-semibold text-neon-green">{mounted ? lastUpdate.toLocaleTimeString() : "—"}</p>
               </div>
 
-              <label className="flex items-center gap-3 rounded-xl border border-border/50 bg-secondary/30 px-3 py-2">
+              <label className="flex items-center gap-3 rounded-xl border border-border/50 bg-white px-3 py-2">
                 <ShieldAlert className={`h-4 w-4 ${stressMode ? "text-destructive" : "text-neon-aqua"}`} />
                 <div>
                   <p className="text-xs font-medium text-foreground">Stress Mode</p>
@@ -900,27 +900,27 @@ export function PlantAIDashboard() {
 
               return (
                 <>
-                  <div className="rounded-xl border border-border/40 bg-secondary/25 p-3 text-center">
+                  <div className="rounded-xl border border-border/40 bg-white p-3 text-center">
                     <p className="text-xs text-muted-foreground">Overall Crop Health</p>
                     <p className="text-2xl font-bold text-foreground">{avgHealth}%</p>
                   </div>
 
-                  <div className="rounded-xl border border-border/40 bg-secondary/25 p-3 text-center">
+                  <div className="rounded-xl border border-border/40 bg-white p-3 text-center">
                     <p className="text-xs text-muted-foreground">Water Saved Today</p>
                     <p className="text-2xl font-bold text-neon-green">{efficiencyNow.waterSavingsL}L</p>
                   </div>
 
-                  <div className="rounded-xl border border-border/40 bg-secondary/25 p-3 text-center">
+                  <div className="rounded-xl border border-border/40 bg-white p-3 text-center">
                     <p className="text-xs text-muted-foreground">Energy Saved Today</p>
                     <p className="text-2xl font-bold text-neon-aqua">{efficiencyNow.energySavingsKwh} kWh</p>
                   </div>
 
-                  <div className="rounded-xl border border-border/40 bg-secondary/25 p-3 text-center">
+                  <div className="rounded-xl border border-border/40 bg-white p-3 text-center">
                     <p className="text-xs text-muted-foreground">Active Alerts</p>
                     <p className="text-2xl font-bold text-warning">{activeAlerts}</p>
                   </div>
 
-                  <div className="rounded-xl border border-border/40 bg-secondary/25 p-3 text-center">
+                  <div className="rounded-xl border border-border/40 bg-white p-3 text-center">
                     <p className="text-xs text-muted-foreground">Next Harvest ETA</p>
                     <p className="text-2xl font-bold text-neon-green">{nextHarvest}d</p>
                   </div>
@@ -932,7 +932,7 @@ export function PlantAIDashboard() {
           {/* Hero row: Growth Rate, Live Camera mock, System Status */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="md:col-span-2 flex gap-4">
-              <div className="rounded-2xl border border-border/50 bg-secondary/25 p-4 flex-1">
+              <div className="rounded-2xl border border-border/50 bg-white p-4 flex-1">
                 <p className="text-xs text-muted-foreground">Growth Rate (weekly)</p>
                 <div className="mt-3 flex items-end justify-between">
                   <div>
@@ -943,7 +943,7 @@ export function PlantAIDashboard() {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/50 bg-secondary/25 p-4 w-56">
+              <div className="rounded-2xl border border-border/50 bg-white p-4 w-56">
                 <p className="text-xs text-muted-foreground">Live Camera</p>
                 <div className="mt-3 h-28 w-full overflow-hidden rounded-md border border-border/40 bg-black/10">
                   <video
@@ -960,7 +960,7 @@ export function PlantAIDashboard() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-border/50 bg-secondary/25 p-4">
+            <div className="rounded-2xl border border-border/50 bg-white p-4">
               <p className="text-xs text-muted-foreground">System Status</p>
               <div className="mt-3 flex items-center justify-between">
                 <div>
@@ -1586,7 +1586,7 @@ export function PlantAIDashboard() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          <div className="rounded-2xl border border-neon-green/25 bg-gradient-to-br from-neon-green/10 via-neon-green/5 to-transparent p-4">
+          <div className="rounded-2xl border border-border/40 bg-white p-4">
             <div className="flex items-center gap-2.5">
               <div className="rounded-xl bg-neon-green/15 p-2 text-neon-green">
                 <Bot className="h-3.5 w-3.5" />
@@ -1616,7 +1616,7 @@ export function PlantAIDashboard() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-neon-aqua/25 bg-gradient-to-br from-neon-aqua/10 via-neon-aqua/5 to-transparent p-4">
+          <div className="rounded-2xl border border-border/40 bg-white p-4">
             <div className="flex items-center gap-2.5">
               <div className="rounded-xl bg-neon-aqua/15 p-2 text-neon-aqua">
                 <Activity className="h-3.5 w-3.5" />
@@ -1659,7 +1659,7 @@ export function PlantAIDashboard() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-500/14 via-cyan-500/7 to-transparent p-4">
+          <div className="rounded-2xl border border-border/40 bg-white p-4">
             <div className="flex items-center gap-2.5">
               <div className="rounded-xl bg-cyan-500/15 p-2 text-cyan-300">
                 <Cpu className="h-3.5 w-3.5" />

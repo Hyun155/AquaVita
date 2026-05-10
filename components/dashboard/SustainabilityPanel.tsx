@@ -139,20 +139,6 @@ export function SustainabilityPanel() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-cyan-200 bg-cyan-50/80 p-4">
-        <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-white/80 p-2 shadow-sm">
-            <Leaf className="w-5 h-5 text-emerald-600" />
-          </div>
-          <div>
-            <h4 className="mb-1 text-sm font-medium text-emerald-700">Environmental Impact</h4>
-            <p className="text-xs leading-relaxed text-slate-600">
-              Your farm has saved <span className="font-medium text-cyan-700">12,450 liters</span> of water this month and converted <span className="font-medium text-emerald-700">156 kg</span> of organic waste into fertilizer.
-              Keep the optimization loop steady.
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

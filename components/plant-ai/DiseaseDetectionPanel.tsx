@@ -247,7 +247,7 @@ export function DiseaseDetectionPanel() {
   }
 
   return (
-    <section className="glass-card rounded-2xl border border-border/50 p-5">
+    <section className="rounded-2xl border border-border/50 p-5 bg-white">
       <div className="mb-4 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-neon-green/90 to-neon-aqua/80">
           <ScanLine className="h-5 w-5 text-background" />
@@ -290,7 +290,7 @@ export function DiseaseDetectionPanel() {
           onChange={onFileChange}
         />
 
-        <div className="overflow-hidden rounded-xl border border-border/50 bg-secondary/30">
+        <div className="overflow-hidden rounded-xl border border-border/50 bg-white">
           {previewUrl ? (
             <img src={previewUrl} alt="Plant upload preview" className="h-44 w-full object-cover" />
           ) : (
@@ -302,14 +302,14 @@ export function DiseaseDetectionPanel() {
         </div>
 
         {manualResult && !isProcessing && !isAutoScanEnabled && (
-          <div className="space-y-2 rounded-xl border border-border/50 bg-secondary/25 p-3 animate-in fade-in slide-in-from-bottom-2">
+          <div className="space-y-2 rounded-xl border border-border/50 bg-white p-3 animate-in fade-in slide-in-from-bottom-2">
             <p className="text-sm font-medium text-foreground">{manualResult.diagnosis}</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="rounded-lg border border-border/40 bg-secondary/40 p-2 text-muted-foreground">
+              <div className="rounded-lg border border-border/40 bg-white p-2 text-muted-foreground">
                 Confidence
                 <p className="mt-0.5 text-sm font-semibold text-neon-green">{manualResult.confidence}%</p>
               </div>
-              <div className="rounded-lg border border-border/40 bg-secondary/40 p-2 text-muted-foreground">
+              <div className="rounded-lg border border-border/40 bg-white p-2 text-muted-foreground">
                 Health score
                 <p className="mt-0.5 text-sm font-semibold text-neon-aqua">{manualResult.healthScore}%</p>
               </div>
@@ -318,7 +318,7 @@ export function DiseaseDetectionPanel() {
         )}
 
         {autoResult && !isProcessing && isAutoScanEnabled && (
-          <div className="space-y-3 rounded-xl border border-neon-aqua/30 bg-neon-aqua/10 p-3 animate-in fade-in slide-in-from-bottom-2">
+          <div className="space-y-3 rounded-xl border border-border/50 bg-white p-3 animate-in fade-in slide-in-from-bottom-2">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-medium text-foreground">{autoResult.plantName}</p>
@@ -332,17 +332,17 @@ export function DiseaseDetectionPanel() {
             <p className="text-sm font-medium text-foreground">{autoResult.diagnosisDetail || autoResult.diagnosis}</p>
 
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="rounded-lg border border-border/40 bg-secondary/40 p-2 text-muted-foreground">
+              <div className="rounded-lg border border-border/40 bg-white p-2 text-muted-foreground">
                 Confidence
                 <p className="mt-0.5 text-sm font-semibold text-neon-green">{autoResult.confidence}%</p>
               </div>
-              <div className="rounded-lg border border-border/40 bg-secondary/40 p-2 text-muted-foreground">
+              <div className="rounded-lg border border-border/40 bg-white p-2 text-muted-foreground">
                 Health score
                 <p className="mt-0.5 text-sm font-semibold text-neon-aqua">{autoResult.healthScore}%</p>
               </div>
             </div>
 
-            <div className="rounded-lg border border-border/40 bg-secondary/35 p-2 text-xs text-muted-foreground">
+            <div className="rounded-lg border border-border/40 bg-white p-2 text-xs text-muted-foreground">
               Automated response: <span className="font-medium text-foreground">{autoResult.automatedResponse}</span>
             </div>
           </div>

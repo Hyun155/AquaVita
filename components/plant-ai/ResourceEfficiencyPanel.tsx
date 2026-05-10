@@ -26,7 +26,7 @@ export function ResourceEfficiencyPanel() {
       {/* Main Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         {/* Water Efficiency */}
-        <div className="rounded-xl border border-border/40 bg-gradient-to-br from-neon-aqua/20 via-secondary/10 to-background/30 p-4">
+        <div className="rounded-xl border border-border/40 bg-white p-4">
           <div className="flex items-start justify-between mb-3">
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Water Recycled</p>
@@ -49,7 +49,7 @@ export function ResourceEfficiencyPanel() {
         </div>
 
         {/* Energy Efficiency */}
-        <div className="rounded-xl border border-border/40 bg-gradient-to-br from-warning/20 via-secondary/10 to-background/30 p-4">
+        <div className="rounded-xl border border-border/40 bg-white p-4">
           <div className="flex items-start justify-between mb-3">
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Energy Efficient</p>
@@ -72,7 +72,7 @@ export function ResourceEfficiencyPanel() {
         </div>
 
         {/* Crop Loss Reduction */}
-        <div className="rounded-xl border border-border/40 bg-gradient-to-br from-neon-green/20 via-secondary/10 to-background/30 p-4">
+        <div className="rounded-xl border border-border/40 bg-white p-4">
           <div className="flex items-start justify-between mb-3">
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Crop Loss Reduction</p>
@@ -95,7 +95,7 @@ export function ResourceEfficiencyPanel() {
         </div>
 
         {/* Nutrient Efficiency */}
-        <div className="rounded-xl border border-border/40 bg-gradient-to-br from-neon-aqua/20 via-secondary/10 to-background/30 p-4">
+        <div className="rounded-xl border border-border/40 bg-white p-4">
           <div className="flex items-start justify-between mb-3">
             <div>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">Nutrient Efficiency</p>
@@ -119,7 +119,7 @@ export function ResourceEfficiencyPanel() {
       </div>
 
       {/* Yield Impact */}
-      <div className="rounded-xl border border-border/40 bg-gradient-to-r from-success/20 via-secondary/10 to-background/30 p-4 mb-6">
+      <div className="rounded-xl border border-border/40 bg-white p-4 mb-6">
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm font-semibold text-foreground">Predicted Yield this Cycle</p>
           <p className="text-3xl font-bold gradient-text">{resourceEfficiencyMetrics.yieldPrediction} kg</p>
@@ -135,7 +135,7 @@ export function ResourceEfficiencyPanel() {
       <div className="space-y-3">
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Sustainability Impact</p>
 
-        <div className="rounded-lg bg-secondary/30 border border-border/40 p-3">
+        <div className="rounded-lg bg-white border border-border/40 p-3">
           <p className="text-sm font-semibold text-foreground mb-2">🌍 Carbon Footprint Reduction</p>
           <p className="text-xs text-muted-foreground mb-2">
             AI optimization reduces energy consumption by {resourceEfficiencyMetrics.energyReduction}kWh, equivalent to ~{(resourceEfficiencyMetrics.energyReduction * 0.4).toFixed(1)}kg CO₂
@@ -156,7 +156,7 @@ export function ResourceEfficiencyPanel() {
           </div>
         </div>
 
-        <div className="rounded-lg bg-secondary/30 border border-border/40 p-3">
+        <div className="rounded-lg bg-white border border-border/40 p-3">
           <p className="text-sm font-semibold text-foreground mb-2">📊 System Efficiency</p>
           <ul className="space-y-1 text-xs text-muted-foreground">
             <li>✓ Layer {verticalLayerMetrics.reduce((max, l) => l.avgHealth > max.avgHealth ? l : max).layerId} operating at peak efficiency ({verticalLayerMetrics.find((l) => l.layerId === verticalLayerMetrics.reduce((max, curr) => curr.avgHealth > max.avgHealth ? curr : max).layerId)?.avgHealth}%)</li>
