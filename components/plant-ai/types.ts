@@ -116,6 +116,7 @@ export interface DiseaseAutoScanResult extends DiseaseDetectionResult {
   issue: "Downy Mildew" | "Nitrogen Deficiency" | "Spider Mites" | "Powdery Mildew" | "Wilting" | "Nutrient Lockout"
   automatedResponse: string
   source: "manual-upload" | "auto-scan"
+  diagnosisDetail?: string // Detailed diagnosis text e.g., "Vein-bounded Leaf Spot Detected"
   suggestedLayerAdjustments?: Record<string, string>
 }
 

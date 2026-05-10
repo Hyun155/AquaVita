@@ -1471,6 +1471,7 @@ export function PlantAIDashboard() {
           {/* Automated Action Log Panel */}
           <section className="relative flex flex-col overflow-hidden rounded-2xl border border-cyan-400/30 bg-gradient-to-br from-blue-50 via-white to-cyan-50/40 p-5 shadow-[0_8px_24px_rgba(34,211,238,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] h-[600px]">
             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(34,211,238,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:22px_22px] opacity-20" />
+            <div className="pointer-events-none absolute inset-0 opacity-35" style={{ backgroundImage: "url('/images/plant-bg.png')", backgroundSize: 'cover', backgroundPosition: 'center bottom', backgroundRepeat: 'no-repeat' }} />
             <div className="relative mb-4 flex flex-shrink-0 items-start justify-between gap-3">
               <div>
                 <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-neon-aqua/30 bg-neon-aqua/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neon-aqua">Telemetry Console</p>
@@ -1630,12 +1631,12 @@ export function PlantAIDashboard() {
                     <Droplets className="h-3 w-3 text-neon-aqua" />
                     Water Saved
                   </span>
-                  <span className="font-semibold text-neon-aqua">{adaptiveInsight.efficiency?.waterSavingsPercent ?? 24}%</span>
+                  <span className="font-semibold text-neon-aqua">16%</span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-neon-aqua/15">
                   <div
                     className="h-full rounded-full bg-neon-aqua"
-                    style={{ width: `${Math.min(100, adaptiveInsight.efficiency?.waterSavingsPercent ?? 24)}%` }}
+                    style={{ width: `16%` }}
                   />
                 </div>
               </div>
@@ -1646,12 +1647,12 @@ export function PlantAIDashboard() {
                     <Zap className="h-3 w-3 text-amber-300" />
                     Energy Saved
                   </span>
-                  <span className="font-semibold text-amber-300">{adaptiveInsight.efficiency?.energySavingsPercent ?? 18}%</span>
+                  <span className="font-semibold text-amber-300">12%</span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-amber-300/15">
                   <div
                     className="h-full rounded-full bg-amber-300"
-                    style={{ width: `${Math.min(100, adaptiveInsight.efficiency?.energySavingsPercent ?? 18)}%` }}
+                    style={{ width: `12%` }}
                   />
                 </div>
               </div>
@@ -1671,7 +1672,7 @@ export function PlantAIDashboard() {
               <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-cyan-500/15">
                 <div className="h-full rounded-full bg-cyan-300" style={{ width: `${adaptiveInsight.successRate}%` }} />
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">Based on {resolvedInterventionCount} resolved interventions</p>
+              <p className="mt-2 text-xs text-muted-foreground">Based on resolved interventions</p>
             </div>
           </div>
         </div>

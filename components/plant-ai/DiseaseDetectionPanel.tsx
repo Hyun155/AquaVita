@@ -14,30 +14,37 @@ const fakeDiagnoses: DiseaseDetectionResult["diagnosis"][] = [
 const autoScanFrames: DiseaseAutoScanResult[] = [
   {
     plantName: "Lettuce A",
+    layerId: 1,
     issue: "Downy Mildew",
     automatedResponse: "Isolation protocol triggered.",
     diagnosis: "Leaf Spot Detected",
+    diagnosisDetail: "Vein-bounded Leaf Spot Detected",
     confidence: 96,
     healthScore: 54,
     source: "auto-scan",
+    detectionMethod: "spectral-scan",
   },
   {
     plantName: "Basil B",
+    layerId: 2,
     issue: "Nitrogen Deficiency",
     automatedResponse: "Increased nutrient dosing.",
     diagnosis: "Nitrogen Deficiency Likely",
     confidence: 94,
     healthScore: 63,
     source: "auto-scan",
+    detectionMethod: "ai-analysis",
   },
   {
     plantName: "Mint D",
+    layerId: 3,
     issue: "Spider Mites",
     automatedResponse: "Applied organic neem oil spray.",
-    diagnosis: "Leaf Spot Detected",
+    diagnosis: "Pest Infestation",
     confidence: 92,
     healthScore: 58,
     source: "auto-scan",
+    detectionMethod: "ai-analysis",
   },
 ]
 
@@ -45,6 +52,9 @@ const autoScanPhotoByIssue: Record<DiseaseAutoScanResult["issue"], string> = {
   "Downy Mildew": "/images/sick-plants/lettuce-downy-mildew.jpg",
   "Nitrogen Deficiency": "/images/sick-plants/basil-nitrogen-deficiency.jpg",
   "Spider Mites": "/images/sick-plants/mint-spider-mites.jpg",
+  "Powdery Mildew": "/images/sick-plants/powdery-mildew.jpg",
+  "Wilting": "/images/sick-plants/wilting-plant.jpg",
+  "Nutrient Lockout": "/images/sick-plants/nutrient-lockout.jpg",
 }
 
 function randomInt(min: number, max: number) {
@@ -207,7 +217,7 @@ export function DiseaseDetectionPanel() {
             ? randomInt(45, 72)
             : randomInt(50, 78)
 
-      setManualResult({ diagnosis, confidence, healthScore })
+      setManualResult({ diagnosis, confidence, healthScore, detectionMethod: "manual" })
       setIsProcessing(false)
     }, processingDelay)
   }
@@ -227,6 +237,13 @@ export function DiseaseDetectionPanel() {
       setAutoResult(nextResult)
       setIsProcessing(false)
     })
+  }
+
+  const stopAutoScan = () => {
+    setIsAutoScanEnabled(false)
+    setAutoResult(null)
+    setPreviewUrl(null)
+    setIsProcessing(false)
   }
 
   return (
@@ -253,12 +270,16 @@ export function DiseaseDetectionPanel() {
 
         <Button
           type="button"
-          onClick={startAutoScan}
+          onClick={isAutoScanEnabled ? stopAutoScan : startAutoScan}
           variant="outline"
-          className="w-full border-neon-aqua/35 bg-neon-aqua/10 text-neon-aqua hover:bg-neon-aqua/15"
+          className={`w-full ${
+            isAutoScanEnabled
+              ? "border-amber-400/35 bg-amber-400/10 text-amber-500 hover:bg-amber-400/15"
+              : "border-neon-aqua/35 bg-neon-aqua/10 text-neon-aqua hover:bg-neon-aqua/15"
+          }`}
         >
-          <Radar className="mr-1 h-4 w-4" />
-          Auto-Scan Mode
+          <Radar className={`mr-1 h-4 w-4 ${isAutoScanEnabled ? "animate-spin" : ""}`} />
+          {isAutoScanEnabled ? "Stop Auto-Scan Mode" : "Auto-Scan Mode"}
         </Button>
 
         <input
@@ -308,7 +329,7 @@ export function DiseaseDetectionPanel() {
               </span>
             </div>
 
-            <p className="text-sm font-medium text-foreground">{autoResult.diagnosis}</p>
+            <p className="text-sm font-medium text-foreground">{autoResult.diagnosisDetail || autoResult.diagnosis}</p>
 
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div className="rounded-lg border border-border/40 bg-secondary/40 p-2 text-muted-foreground">
