@@ -76,8 +76,6 @@ export function PlantCard(props: PlantCardProps) {
   const healthStyle = getHealthClasses(plant.health)
   const isCritical = plant.health < 50
   const displayedHealth = useCountUp(plant.health, 850)
-  const displayedPh = useCountUp(plant.ph, 900, 2)
-  const displayedTemperature = useCountUp(plant.temperature, 900, 1)
   const displayedDaysToHarvest = useCountUp(daysToHarvest, 950)
   const displayedRecoveryProgress = useCountUp(props.recoveryProgress ?? 0, 700)
   const profileToneClass = isCritical ? "from-white/90 via-slate-50/80 to-cyan-50/70" : "from-white/90 via-slate-50/80 to-cyan-50/70"
@@ -114,13 +112,8 @@ export function PlantCard(props: PlantCardProps) {
           </div>
 
           <div className="text-xs text-muted-foreground">
-            <div>pH</div>
-            <div className="font-medium text-foreground">{displayedPh.toFixed(2)}</div>
-          </div>
-
-          <div className="text-xs text-muted-foreground">
-            <div>Temp</div>
-            <div className="font-medium text-foreground">{displayedTemperature.toFixed(1)}°C</div>
+            <div>Disease Risk</div>
+            <div className="font-medium text-foreground">{plant.diseaseRiskScore}%</div>
           </div>
         </div>
 
@@ -156,12 +149,12 @@ export function PlantCard(props: PlantCardProps) {
 
         <div className="grid grid-cols-2 gap-2.5 text-xs">
           <div className="flex items-center gap-2 rounded-lg border border-border/40 bg-secondary/20 p-2 text-muted-foreground">
-            <TestTubeDiagonal className="h-3.5 w-3.5 text-neon-aqua" />
-            pH {displayedPh.toFixed(2)}
+            <Sparkles className="h-3.5 w-3.5 text-neon-green" />
+            Growth Rate +{plant.growthRate}
           </div>
           <div className="flex items-center gap-2 rounded-lg border border-border/40 bg-secondary/20 p-2 text-muted-foreground">
-            <Thermometer className="h-3.5 w-3.5 text-warning" />
-            {displayedTemperature.toFixed(1)}°C
+            <Radar className="h-3.5 w-3.5 text-warning" />
+            Disease Risk {plant.diseaseRiskScore}%
           </div>
         </div>
       </div>

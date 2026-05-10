@@ -225,7 +225,7 @@ export function DigitalTwin() {
                   <span className="uppercase tracking-[0.2em]">Environmental overlay</span>
                 </div>
                 <p className="mt-2 text-muted-foreground">
-                  {activeLayer.name} temperature {activeLayer.temperature.toFixed(1)}°C • humidity {activeLayer.humidity}% • pH {activeLayer.ph}
+                  {activeLayer.name} temperature {activeLayer.temperature.toFixed(1)}°C • humidity {activeLayer.humidity}%
                 </p>
               </motion.div>
             )}
@@ -275,8 +275,6 @@ export function DigitalTwin() {
                     <TelemetryRow label="Plant health" value={`${layer.health}%`} accent="text-success" />
                     <TelemetryRow label="Temperature" value={layer.temperature} accent="text-warning" />
                     <TelemetryRow label="Humidity" value={layer.humidity} accent="text-neon-aqua" />
-                    <TelemetryRow label="pH" value={layer.ph} accent="text-neon-blue" />
-                    <TelemetryRow label="EC level" value={layer.ec} accent="text-neon-aqua" />
                     <TelemetryRow label="Growth rate" value={layer.growthRate} accent="text-neon-green" />
                     <TelemetryRow label="Disease risk" value={layer.diseaseRisk} accent="text-warning" />
                     <TelemetryRow label="Yield prediction" value={layer.yieldPrediction} accent="text-success" />

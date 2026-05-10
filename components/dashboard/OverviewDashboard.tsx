@@ -1,6 +1,7 @@
 "use client"
 
 import { DigitalTwin } from "@/components/environment/DigitalTwin"
+import { InfrastructureReliabilityMonitor } from "@/components/dashboard/InfrastructureReliabilityMonitor"
 
 export function OverviewDashboard() {
   const snapshotCards = [
@@ -55,6 +56,8 @@ export function OverviewDashboard() {
           </div>
 
           <DigitalTwin />
+
+          <InfrastructureReliabilityMonitor />
 
           <div className="rounded-3xl border border-white/60 bg-white/70 px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-4">
