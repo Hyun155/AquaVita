@@ -1,15 +1,9 @@
 "use client"
 
-import { useState } from "react"
-import { Bell, Leaf, Wifi, Fish, Droplets, Search, User } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Leaf, Wifi } from "lucide-react"
 import { useSuppressExtensions } from "@/hooks/useSuppressExtensions"
 
 export function TopNavbar() {
-  const [activeView, setActiveView] = useState<"hydro" | "aqua">("hydro")
-  const [notifications] = useState(3)
-  // Light-only site: no theme toggle or dark mode handling
-  const [mounted] = useState(true)
   useSuppressExtensions()
 
   return (
@@ -32,31 +26,6 @@ export function TopNavbar() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-secondary/30 border border-border/50">
-            <Search className="w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search systems..."
-              className="bg-transparent text-sm outline-none w-40 placeholder:text-muted-foreground"
-            />
-          </div>
-
-          <button className="relative p-2.5 rounded-xl bg-secondary/30 border border-border/50 hover:bg-secondary/50 transition-colors">
-            <Bell className="w-5 h-5 text-muted-foreground" />
-            {notifications > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-xs font-bold flex items-center justify-center text-destructive-foreground animate-pulse">
-                {notifications}
-              </span>
-            )}
-          </button>
-
-          {/* Theme toggle removed for light-only site */}
-
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neon-aqua to-neon-blue flex items-center justify-center cursor-pointer hover:scale-105 transition-transform">
-            <User className="w-5 h-5 text-background" />
-          </div>
-        </div>
       </div>
     </header>
   )
