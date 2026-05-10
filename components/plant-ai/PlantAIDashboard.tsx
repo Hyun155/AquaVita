@@ -6,10 +6,11 @@ import { RecommendationCard } from "@/components/plant-ai/RecommendationCard"
 import { DiseaseDetectionPanel } from "@/components/plant-ai/DiseaseDetectionPanel"
 import { Switch } from "@/components/ui/switch"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import type { GrowthStage, PlantProfile, PlantRecommendation, PlantTelemetry } from "@/components/plant-ai/types"
 import { automationController, type AutomationAction } from "@/lib/automationController"
 import Image from "next/image"
-import { ShieldAlert, Activity, Cpu, Clock3, Droplets, Zap, Bot, Leaf, Thermometer, SunMedium, Gauge, MapPinned, Sparkles } from "lucide-react"
+import { ShieldAlert, Activity, Cpu, Clock3, Droplets, Zap, Bot, Leaf, Thermometer, SunMedium, Gauge, MapPinned, Sparkles, AlertCircle } from "lucide-react"
 
 const HEALTH_HISTORY_LIMIT = 24
 
@@ -1095,255 +1096,206 @@ export function PlantAIDashboard() {
 
                 {/* Scrollable Content */}
                 <ScrollArea className="flex-1 overflow-hidden">
-                  <div className="space-y-6 pr-4">
+                  <div className="space-y-4 pr-4">
 
-                  {/* Health Indicators Grid with Visual Elements */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Health Percentage */}
-                    <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-xs text-slate-500 font-medium">Leaf color</p>
-                          <p className="mt-2 text-sm font-semibold text-slate-900 capitalize">{selectedPlant.healthIndicators.leafColor}</p>
-                        </div>
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          selectedPlant.healthIndicators.leafColor === "vibrant" 
-                            ? "bg-green-100" 
-                            : selectedPlant.healthIndicators.leafColor === "pale"
-                            ? "bg-yellow-100"
-                            : "bg-amber-100"
-                        }`}>
-                          <Leaf className={`h-5 w-5 ${
-                            selectedPlant.healthIndicators.leafColor === "vibrant" 
-                              ? "text-green-600" 
-                              : selectedPlant.healthIndicators.leafColor === "pale"
-                              ? "text-yellow-600"
-                              : "text-amber-600"
-                          }`} />
-                        </div>
+                    {/* PRIMARY: Overall Health Status */}
+                    <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-green-50/50 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-sm font-semibold text-slate-900">Plant Health Status</p>
+                        <p className="text-3xl font-bold text-emerald-600">{Math.round(selectedPlant.health)}%</p>
                       </div>
-                    </div>
-
-                    {/* Leaf Condition */}
-                    <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-xs text-slate-500 font-medium">Leaf condition</p>
-                          <p className="mt-2 text-sm font-semibold text-slate-900 capitalize">{selectedPlant.healthIndicators.leafCondition}</p>
-                        </div>
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          selectedPlant.healthIndicators.leafCondition === "pristine" 
-                            ? "bg-emerald-100" 
-                            : selectedPlant.healthIndicators.leafCondition === "good"
-                            ? "bg-green-100"
-                            : "bg-amber-100"
-                        }`}>
-                          <Leaf className={`h-5 w-5 ${
-                            selectedPlant.healthIndicators.leafCondition === "pristine" 
-                              ? "text-emerald-600" 
-                              : selectedPlant.healthIndicators.leafCondition === "good"
-                              ? "text-green-600"
-                              : "text-amber-600"
-                          }`} />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Nitrogen Status */}
-                    <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-xs text-slate-500 font-medium">Nitrogen</p>
-                          <p className="mt-2 text-lg font-bold text-slate-900">{selectedPlant.healthIndicators.nitrogenStatus}%</p>
-                        </div>
-                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                          <span className="text-xs font-bold text-blue-600">N</span>
-                        </div>
-                      </div>
-                      <div className="mt-3 h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">
+                      <div className="h-3 w-full rounded-full bg-emerald-100 overflow-hidden mb-4">
                         <div 
-                          className="h-full rounded-full bg-blue-500" 
-                          style={{ width: `${selectedPlant.healthIndicators.nitrogenStatus}%` }}
+                          className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-green-500" 
+                          style={{ width: `${selectedPlant.health}%` }}
                         />
                       </div>
-                    </div>
-
-                    {/* Hydration Level */}
-                    <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-xs text-slate-500 font-medium">Hydration</p>
-                          <p className="mt-2 text-lg font-bold text-slate-900">{selectedPlant.healthIndicators.hydrationLevel}%</p>
+                      <p className="text-xs text-slate-600 mb-3">Trend: <span className="font-semibold text-slate-900">{selectedSummary.trend.label}</span></p>
+                      
+                      {/* Supporting indicators as compact badges */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5 text-xs">
+                          <p className="text-slate-500 mb-1">Leaf Color</p>
+                          <p className="font-medium text-slate-900 capitalize">{selectedPlant.healthIndicators.leafColor}</p>
                         </div>
-                        <div className="w-10 h-10 rounded-lg bg-cyan-100 flex items-center justify-center">
-                          <Droplets className="h-5 w-5 text-cyan-600" />
+                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5 text-xs">
+                          <p className="text-slate-500 mb-1">Leaf Condition</p>
+                          <p className="font-medium text-slate-900 capitalize">{selectedPlant.healthIndicators.leafCondition}</p>
+                        </div>
+                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5 text-xs">
+                          <p className="text-slate-500 mb-1">Hydration</p>
+                          <p className="font-semibold text-cyan-600">{selectedPlant.healthIndicators.hydrationLevel}%</p>
+                        </div>
+                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5 text-xs">
+                          <p className="text-slate-500 mb-1">Nutrient Balance</p>
+                          <p className="font-semibold text-blue-600">{selectedPlant.healthIndicators.nutrientBalance}%</p>
                         </div>
                       </div>
-                      <div className="mt-3 h-1.5 w-full rounded-full bg-slate-200 overflow-hidden">
-                        <div 
-                          className="h-full rounded-full bg-cyan-500" 
-                          style={{ width: `${selectedPlant.healthIndicators.hydrationLevel}%` }}
-                        />
-                      </div>
                     </div>
-                  </div>
 
-                  {/* Main Health Score */}
-                  <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-green-50/50 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-sm font-semibold text-slate-900">Overall Health</p>
-                      <p className="text-3xl font-bold text-emerald-600">{Math.round(selectedPlant.health)}%</p>
-                    </div>
-                    <div className="h-3 w-full rounded-full bg-emerald-100 overflow-hidden">
-                      <div 
-                        className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-green-500" 
-                        style={{ width: `${selectedPlant.health}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Telemetry and Info */}
-                  <div className="space-y-3">
+                    {/* SECONDARY: Current Live Telemetry */}
                     <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        <div className="mb-3 flex items-center justify-between">
-                          <p className="text-sm font-semibold text-slate-900">Current telemetry</p>
-                          <span className="text-xs text-slate-500">Trend: {selectedSummary.trend.label}</span>
+                      <p className="mb-3 text-sm font-semibold text-slate-900">Current Telemetry</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                          <p className="text-slate-500">pH</p>
+                          <p className="mt-1 font-semibold text-slate-900">{selectedPlant.ph.toFixed(2)}</p>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                            <p className="text-slate-500">Light</p>
-                            <p className="mt-1 font-semibold text-slate-900">{selectedPlant.lightIntensity} µmol</p>
-                          </div>
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                            <p className="text-slate-500">EC</p>
-                            <p className="mt-1 font-semibold text-slate-900">{selectedPlant.ec.toFixed(1)}</p>
-                          </div>
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                            <p className="text-slate-500">Risk score</p>
-                            <p className="mt-1 font-semibold text-slate-900">{selectedSummary.riskScore}</p>
-                          </div>
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                            <p className="text-slate-500">Harvest ETA</p>
-                            <p className="mt-1 font-semibold text-emerald-600">{selectedSummary.daysToHarvest}d</p>
-                          </div>
+                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                          <p className="text-slate-500">Temperature</p>
+                          <p className="mt-1 font-semibold text-slate-900">{selectedPlant.temperature.toFixed(1)}°C</p>
                         </div>
-                      </div>
-
-                      <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        <p className="mb-3 text-sm font-semibold text-slate-900">Plant profile</p>
-                        <div className="grid gap-3 text-xs sm:grid-cols-2">
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                            <p className="text-slate-500">Growth speed</p>
-                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.growthSpeed}</p>
-                          </div>
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                            <p className="text-slate-500">Ideal for</p>
-                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.idealFor ?? "General hydroponic conditions"}</p>
-                          </div>
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                            <p className="text-slate-500">Leaf structure</p>
-                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.leafTypeOrStructure ?? "Standard leafy structure"}</p>
-                          </div>
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                            <p className="text-slate-500">Harvest ready</p>
-                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.harvestReadyDays ?? "—"} days</p>
-                          </div>
+                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                          <p className="text-slate-500">Light</p>
+                          <p className="mt-1 font-semibold text-slate-900">{selectedPlant.lightIntensity} µmol</p>
                         </div>
-
-                        <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                            <p className="text-slate-500">Optimal pH</p>
-                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.optimalPh}</p>
-                          </div>
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3">
-                            <p className="text-slate-500">Optimal temp</p>
-                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.optimalTemperature}</p>
-                          </div>
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-3 sm:col-span-2">
-                            <p className="text-slate-500">Optimal humidity</p>
-                            <p className="mt-1 font-medium text-slate-900">{selectedProfile.optimalHumidity ?? "—"}</p>
-                          </div>
+                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                          <p className="text-slate-500">EC</p>
+                          <p className="mt-1 font-semibold text-slate-900">{selectedPlant.ec.toFixed(1)}</p>
+                        </div>
+                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                          <p className="text-slate-500">Risk Score</p>
+                          <p className="mt-1 font-semibold text-slate-900">{selectedSummary.riskScore}</p>
+                        </div>
+                        <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
+                          <p className="text-slate-500">Harvest ETA</p>
+                          <p className="mt-1 font-semibold text-emerald-600">{selectedSummary.daysToHarvest}d</p>
                         </div>
                       </div>
 
-                      <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        <p className="mb-2 text-sm font-semibold text-slate-900">Sensitivities</p>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedProfile.sensitivities.map((item) => (
-                            <span key={item} className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] text-emerald-700 shadow-[0_0_18px_rgba(34,197,94,0.05)]">
-                              {item}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        <p className="mb-2 text-sm font-semibold text-slate-900">Common issues</p>
-                        <div className="space-y-2 text-xs text-slate-600">
-                          {selectedProfile.commonIssues.map((item) => (
-                            <div key={item} className="flex gap-2">
-                              <Leaf className="mt-0.5 h-3.5 w-3.5 text-emerald-500" />
-                              <span>{item}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        <p className="mb-2 text-sm font-semibold text-slate-900">Simulation behavior</p>
-                        <div className="space-y-2 text-xs text-slate-600">
-                          {selectedProfile.simulationBehavior.map((item) => (
-                            <div key={item} className="flex gap-2">
-                              <Gauge className="mt-0.5 h-3.5 w-3.5 text-emerald-500" />
-                              <span>{item}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {selectedProfile.ledSpectrumNeeds && (
-                        <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                          <p className="mb-2 text-sm font-semibold text-slate-900">LED spectrum needs</p>
-                          <div className="space-y-2 text-xs text-slate-600">
-                            {Object.entries(selectedProfile.ledSpectrumNeeds).map(([stage, value]) => (
-                              <div key={stage} className="flex items-start gap-2">
-                                <SunMedium className="mt-0.5 h-3.5 w-3.5 text-emerald-500" />
-                                <span>
-                                  <span className="font-medium text-slate-900 capitalize">{stage}</span>: {value}
-                                </span>
+                      {selectedPlant.healthIndicators.stressSignals.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-slate-200">
+                          <p className="text-xs font-semibold text-slate-900 mb-2">Active Stress Signals</p>
+                          <div className="space-y-1.5">
+                            {selectedPlant.healthIndicators.stressSignals.map((signal) => (
+                              <div key={signal} className="flex gap-2 items-start">
+                                <AlertCircle className="h-3.5 w-3.5 text-amber-500 flex-shrink-0 mt-0.5" />
+                                <span className="text-xs text-slate-600">{signal}</span>
                               </div>
                             ))}
                           </div>
                         </div>
                       )}
+                    </div>
 
-                      <div className="rounded-2xl border border-slate-200 bg-white/65 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-                        <p className="mb-2 text-sm font-semibold text-slate-900">Additional health details</p>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                            <p className="text-slate-500">Nitrogen</p>
-                            <p className="mt-1 font-medium text-slate-900">{selectedPlant.healthIndicators.nitrogenStatus}%</p>
+                    {/* TERTIARY: Plant Profile (Expandable via Accordion) */}
+                    <Accordion type="single" collapsible className="w-full space-y-2">
+                      {/* Growth Profile */}
+                      <AccordionItem value="growth" className="border border-slate-200 bg-white/65 rounded-xl px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                        <AccordionTrigger className="text-sm font-semibold text-slate-900 py-3 hover:no-underline">
+                          Growth Profile
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-3 pb-3">
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div className="rounded-lg border border-slate-200 bg-white/75 p-2.5">
+                              <p className="text-slate-500 mb-1">Growth Speed</p>
+                              <p className="font-medium text-slate-900">{selectedProfile.growthSpeed}</p>
+                            </div>
+                            <div className="rounded-lg border border-slate-200 bg-white/75 p-2.5">
+                              <p className="text-slate-500 mb-1">Ideal For</p>
+                              <p className="font-medium text-slate-900 text-xs">{selectedProfile.idealFor ?? "General"}</p>
+                            </div>
+                            <div className="rounded-lg border border-slate-200 bg-white/75 p-2.5 col-span-2">
+                              <p className="text-slate-500 mb-1">Leaf Structure</p>
+                              <p className="font-medium text-slate-900">{selectedProfile.leafTypeOrStructure ?? "Standard"}</p>
+                            </div>
+                            <div className="rounded-lg border border-slate-200 bg-white/75 p-2.5">
+                              <p className="text-slate-500 mb-1">Harvest Ready</p>
+                              <p className="font-medium text-slate-900">{selectedProfile.harvestReadyDays ?? "—"} days</p>
+                            </div>
                           </div>
-                          <div className="rounded-xl border border-slate-200 bg-white/75 p-2.5">
-                            <p className="text-slate-500">Nutrient balance</p>
-                            <p className="mt-1 font-medium text-slate-900">{selectedPlant.healthIndicators.nutrientBalance}%</p>
-                          </div>
-                        </div>
+                        </AccordionContent>
+                      </AccordionItem>
 
-                        {selectedPlant.healthIndicators.stressSignals.length > 0 ? (
-                          <div className="mt-3 space-y-2 text-xs text-slate-600">
-                            {selectedPlant.healthIndicators.stressSignals.map((signal) => (
-                              <div key={signal} className="flex gap-2">
-                                <Zap className="mt-0.5 h-3.5 w-3.5 text-amber-500" />
-                                <span>{signal}</span>
-                              </div>
+                      {/* Environmental Requirements */}
+                      <AccordionItem value="environment" className="border border-slate-200 bg-white/65 rounded-xl px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                        <AccordionTrigger className="text-sm font-semibold text-slate-900 py-3 hover:no-underline">
+                          Environmental Requirements
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-3 pb-3">
+                          <div className="grid grid-cols-2 gap-3 text-xs">
+                            <div className="rounded-lg border border-slate-200 bg-white/75 p-2.5">
+                              <p className="text-slate-500 mb-1">Optimal pH</p>
+                              <p className="font-medium text-slate-900">{selectedProfile.optimalPh}</p>
+                            </div>
+                            <div className="rounded-lg border border-slate-200 bg-white/75 p-2.5">
+                              <p className="text-slate-500 mb-1">Optimal Temp</p>
+                              <p className="font-medium text-slate-900">{selectedProfile.optimalTemperature}</p>
+                            </div>
+                            <div className="rounded-lg border border-slate-200 bg-white/75 p-2.5 col-span-2">
+                              <p className="text-slate-500 mb-1">Optimal Humidity</p>
+                              <p className="font-medium text-slate-900">{selectedProfile.optimalHumidity ?? "Not specified"}</p>
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+
+                      {/* Plant Sensitivities */}
+                      <AccordionItem value="sensitivities" className="border border-slate-200 bg-white/65 rounded-xl px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                        <AccordionTrigger className="text-sm font-semibold text-slate-900 py-3 hover:no-underline">
+                          Sensitivities & Risk Factors
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-2 pb-3">
+                          <div className="flex flex-wrap gap-2">
+                            {selectedProfile.sensitivities.map((item) => (
+                              <span key={item} className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-700 shadow-[0_0_12px_rgba(217,119,6,0.08)]">
+                                {item}
+                              </span>
                             ))}
                           </div>
-                        ) : (
-                          <p className="mt-3 text-xs text-slate-600">No active stress signals detected for this plant.</p>
-                        )}
-                      </div>
-                    </div>
+                        </AccordionContent>
+                      </AccordionItem>
+
+                      {/* Common Issues */}
+                      <AccordionItem value="issues" className="border border-slate-200 bg-white/65 rounded-xl px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                        <AccordionTrigger className="text-sm font-semibold text-slate-900 py-3 hover:no-underline">
+                          Common Issues & Solutions
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-2 pb-3">
+                          {selectedProfile.commonIssues.map((item) => (
+                            <div key={item} className="flex gap-2 text-xs text-slate-600">
+                              <Leaf className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                              <span>{item}</span>
+                            </div>
+                          ))}
+                        </AccordionContent>
+                      </AccordionItem>
+
+                      {/* LED Spectrum Optimization */}
+                      {selectedProfile.ledSpectrumNeeds && (
+                        <AccordionItem value="light" className="border border-slate-200 bg-white/65 rounded-xl px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                          <AccordionTrigger className="text-sm font-semibold text-slate-900 py-3 hover:no-underline">
+                            Light Optimization
+                          </AccordionTrigger>
+                          <AccordionContent className="space-y-2 pb-3">
+                            {Object.entries(selectedProfile.ledSpectrumNeeds).map(([stage, value]) => (
+                              <div key={stage} className="flex items-start gap-2 text-xs">
+                                <SunMedium className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                                <span>
+                                  <span className="font-semibold text-slate-900 capitalize">{stage}:</span>{" "}
+                                  <span className="text-slate-600">{value}</span>
+                                </span>
+                              </div>
+                            ))}
+                          </AccordionContent>
+                        </AccordionItem>
+                      )}
+
+                      {/* Simulation Behavior */}
+                      <AccordionItem value="simulation" className="border border-slate-200 bg-white/65 rounded-xl px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                        <AccordionTrigger className="text-sm font-semibold text-slate-900 py-3 hover:no-underline">
+                          Growth Behavior & Predictors
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-2 pb-3">
+                          {selectedProfile.simulationBehavior.map((item) => (
+                            <div key={item} className="flex gap-2 text-xs text-slate-600">
+                              <Gauge className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                              <span>{item}</span>
+                            </div>
+                          ))}
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   </div>
                 </ScrollArea>
               </div>
