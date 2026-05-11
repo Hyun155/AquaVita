@@ -9,7 +9,7 @@ TEAM: HUSTLE SQUAD
 
 | Live Demo | Video Presentation | 
 | :---: | :---: | 
-| [**Launch Web App**]() | [**https://drive.google.com/file/d/1sMioelKfdtbSiTnaoVWoEURG3uf0PLwH/view?usp=drivesdk**]() | 
+| [**Launch Web App**]() | [**Watch Demo**](**https://drive.google.com/file/d/1sMioelKfdtbSiTnaoVWoEURG3uf0PLwH/view?usp=drivesdk**) | 
 
 
 ---
